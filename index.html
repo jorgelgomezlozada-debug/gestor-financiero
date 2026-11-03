@@ -30,14 +30,14 @@
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="openModal('backup-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Respaldo">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                <button onclick="openModal('pocket-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Gestionar Bolsillos">
+                    <i class="fa-solid fa-piggy-bank"></i>
                 </button>
-                <button onclick="openModal('category-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Gestionar Categorías">
+                <button onclick="openModal('category-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Categorías">
                     <i class="fa-solid fa-folder-plus"></i>
                 </button>
-                <button onclick="openModal('budget-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Gestionar Topes">
-                    <i class="fa-solid fa-sliders"></i>
+                <button onclick="openModal('backup-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Respaldo">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
                 </button>
             </div>
         </header>
@@ -55,51 +55,77 @@
             </button>
         </div>
 
-        <main class="flex-1 overflow-y-auto no-scrollbar pb-24 p-4 space-y-5">
-            <section class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
-                <p class="text-xs uppercase tracking-wider text-indigo-200 font-medium">Balance Total (COP)</p>
-                <h2 id="total-balance" class="text-3xl font-extrabold mt-1 tracking-tight">$ 0</h2>
-                <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/10">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                            <i class="fa-solid fa-arrow-down text-xs"></i>
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-24 p-4 space-y-4">
+            
+            <!-- TARJETA DE SALDOS PRINCIPALES -->
+            <section class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl p-4 shadow-lg relative overflow-hidden space-y-3">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-wider text-indigo-200 font-medium">Disponible para Gastar</p>
+                        <h2 id="total-balance" class="text-2xl font-extrabold tracking-tight">$ 0</h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] uppercase tracking-wider text-indigo-200 font-medium">Total Ahorrado (Bolsillos)</p>
+                        <h3 id="total-pockets" class="text-lg font-bold text-emerald-300">$ 0</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                            <i class="fa-solid fa-arrow-down text-[10px]"></i>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase text-indigo-200">Ingresos</p>
-                            <p id="monthly-income" class="text-sm font-bold text-emerald-400">$ 0</p>
+                            <p class="text-[9px] uppercase text-indigo-200">Ingresos (Mes)</p>
+                            <p id="monthly-income" class="text-xs font-bold text-emerald-400">$ 0</p>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
-                            <i class="fa-solid fa-arrow-up text-xs"></i>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
+                            <i class="fa-solid fa-arrow-up text-[10px]"></i>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase text-indigo-200">Egresos</p>
-                            <p id="monthly-expense" class="text-sm font-bold text-rose-400">$ 0</p>
+                            <p class="text-[9px] uppercase text-indigo-200">Egresos (Mes)</p>
+                            <p id="monthly-expense" class="text-xs font-bold text-rose-400">$ 0</p>
                         </div>
                     </div>
                 </div>
             </section>
 
+            <!-- SECCIÓN DE BOLSILLOS PERSISTENTES -->
+            <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-piggy-bank text-emerald-500"></i> Mis Bolsillos de Ahorro (Persistentes)
+                    </h3>
+                    <button onclick="openModal('pocket-modal')" class="text-xs text-indigo-500 font-semibold hover:underline">+ Administrar</button>
+                </div>
+                <div id="pockets-container" class="space-y-2">
+                    <!-- Inyectado por JS -->
+                </div>
+            </section>
+
+            <!-- TOPES DEL MES -->
             <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                    <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
                         <i class="fa-solid fa-chart-pie text-indigo-500"></i> Topes del Mes
                     </h3>
-                    <button onclick="openModal('category-modal')" class="text-xs text-indigo-500 font-semibold hover:underline">Editar Categorías</button>
+                    <button onclick="openModal('budget-modal')" class="text-xs text-indigo-500 font-semibold hover:underline">Configurar Topes</button>
                 </div>
-                <div id="budgets-container" class="space-y-3"></div>
+                <div id="budgets-container" class="space-y-2"></div>
             </section>
 
-            <section class="space-y-3">
+            <!-- MOVIMIENTOS -->
+            <section class="space-y-2">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                    <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
                         <i class="fa-solid fa-list-ul text-indigo-500"></i> Movimientos
                     </h3>
-                    <div class="flex space-x-1 bg-slate-200 dark:bg-slate-700 p-1 rounded-lg text-xs">
-                        <button onclick="setFilter('all')" id="filter-all" class="px-2.5 py-1 rounded-md font-medium bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-indigo-400">Todos</button>
-                        <button onclick="setFilter('income')" id="filter-income" class="px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300">Ingresos</button>
-                        <button onclick="setFilter('expense')" id="filter-expense" class="px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300">Egresos</button>
+                    <div class="flex space-x-1 bg-slate-200 dark:bg-slate-700 p-1 rounded-lg text-[10px]">
+                        <button onclick="setFilter('all')" id="filter-all" class="px-2 py-0.5 rounded font-medium bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-indigo-400">Todos</button>
+                        <button onclick="setFilter('income')" id="filter-income" class="px-2 py-0.5 rounded font-medium text-slate-600 dark:text-slate-300">Ingresos</button>
+                        <button onclick="setFilter('expense')" id="filter-expense" class="px-2 py-0.5 rounded font-medium text-slate-600 dark:text-slate-300">Egresos</button>
                     </div>
                 </div>
                 <div id="transactions-list" class="space-y-2"></div>
@@ -117,9 +143,9 @@
                 <i class="fa-solid fa-circle-plus text-lg"></i>
                 <span class="text-[10px] mt-0.5 font-medium">Añadir</span>
             </button>
-            <button onclick="openModal('budget-modal')" class="flex flex-col items-center hover:text-indigo-600">
-                <i class="fa-solid fa-chart-line text-lg"></i>
-                <span class="text-[10px] mt-0.5 font-medium">Topes</span>
+            <button onclick="openModal('pocket-modal')" class="flex flex-col items-center hover:text-indigo-600">
+                <i class="fa-solid fa-piggy-bank text-lg"></i>
+                <span class="text-[10px] mt-0.5 font-medium">Bolsillos</span>
             </button>
             <button onclick="openModal('backup-modal')" class="flex flex-col items-center hover:text-indigo-600">
                 <i class="fa-solid fa-shield-halved text-lg"></i>
@@ -128,7 +154,7 @@
         </nav>
     </div>
 
-    <!-- MODAL REGISTRO TRANSACCIÓN -->
+    <!-- MODAL TRANSACCIÓN -->
     <div id="transaction-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -161,56 +187,54 @@
         </div>
     </div>
 
-    <!-- MODAL GESTIÓN Y EDICIÓN DE CATEGORÍAS -->
-    <div id="category-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white">Categorías del Mes</h3>
-                <button onclick="closeModal('category-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- MODAL GESTIÓN DE BOLSILLOS -->
+    <div id="pocket-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="text-base font-bold text-slate-800 dark:text-white">🐷 Bolsillos de Ahorro</h3>
+                <button onclick="closeModal('pocket-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
-            <div class="space-y-4">
-                <form onsubmit="handleCategoryAdd(event)" class="space-y-3 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl">
-                    <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Crear Categoría para este Mes</p>
-                    <input type="text" id="new-cat-name" required placeholder="Ej. Mercado, Cumpleaños..." class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
-                    <input type="number" step="1" id="new-cat-budget" placeholder="Tope inicial (opcional)" class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
-                    <button type="submit" class="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg">+ Agregar Categoría</button>
-                </form>
 
-                <div class="space-y-2">
-                    <p class="text-xs font-bold text-slate-500">Categorías Existentes (Editar / Eliminar)</p>
-                    <div id="categories-edit-list" class="space-y-2"></div>
-                </div>
+            <form onsubmit="handleCreatePocket(event)" class="space-y-3 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl">
+                <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Crear Nuevo Bolsillo</p>
+                <input type="text" id="pocket-name" required placeholder="Ej. Viaje Cartagena, Fondo de Emergencia..." class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
+                <button type="submit" class="w-full py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg">+ Crear Bolsillo</button>
+            </form>
+
+            <div class="space-y-3">
+                <p class="text-xs font-bold text-slate-500">Mover Dinero (Saldo Disponible ⇄ Bolsillo)</p>
+                <div id="pockets-manager-list" class="space-y-3"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL GESTIÓN DE TOPES -->
+    <!-- MODAL CATEGORÍAS -->
+    <div id="category-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="text-base font-bold text-slate-800 dark:text-white">Categorías del Mes</h3>
+                <button onclick="closeModal('category-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleCategoryAdd(event)" class="space-y-3 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl">
+                <input type="text" id="new-cat-name" required placeholder="Nombre de categoría..." class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
+                <input type="number" step="1" id="new-cat-budget" placeholder="Tope mensual ($ COP)" class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
+                <button type="submit" class="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg">+ Agregar Categoría</button>
+            </form>
+            <div id="categories-edit-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- MODAL TOPES -->
     <div id="budget-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white">Gestionar Topes del Mes</h3>
+                <h3 class="text-base font-bold text-slate-800 dark:text-white">Configurar Topes</h3>
                 <button onclick="closeModal('budget-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="handleBudgetSubmit(event)" class="space-y-4">
                 <div id="budget-inputs-list" class="space-y-3"></div>
-                <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl shadow-md">Actualizar Topes</button>
+                <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl shadow-md">Guardar Topes</button>
             </form>
-        </div>
-    </div>
-
-    <!-- MODAL DETALLE DE CATEGORÍA -->
-    <div id="category-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 id="cat-detail-title" class="text-base font-bold text-slate-800 dark:text-white">Detalle</h3>
-                <button onclick="closeModal('category-detail-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div id="cat-detail-summary" class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border mb-4 space-y-2 text-xs"></div>
-            <div class="space-y-3">
-                <h4 class="text-xs font-bold uppercase text-slate-400">Movimientos del Mes</h4>
-                <div id="cat-detail-tx-list" class="space-y-2"></div>
-            </div>
         </div>
     </div>
 
@@ -235,7 +259,6 @@
         }
 
         const DEFAULT_CATEGORIES = ['Mercado', 'Comida', 'Transporte', 'Ocio', 'Servicios', 'Otros'];
-
         const today = new Date();
         const initialMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
@@ -243,6 +266,7 @@
             monthlyCategories: JSON.parse(localStorage.getItem('mibolsillo_m_categories')) || {},
             transactions: JSON.parse(localStorage.getItem('mibolsillo_transactions')) || [],
             budgets: JSON.parse(localStorage.getItem('mibolsillo_budgets')) || {},
+            pockets: JSON.parse(localStorage.getItem('mibolsillo_pockets')) || { 'Ahorro Principal': 0 },
             selectedMonth: initialMonth,
             currentType: 'expense',
             filter: 'all'
@@ -263,6 +287,7 @@
             localStorage.setItem('mibolsillo_m_categories', JSON.stringify(state.monthlyCategories));
             localStorage.setItem('mibolsillo_transactions', JSON.stringify(state.transactions));
             localStorage.setItem('mibolsillo_budgets', JSON.stringify(state.budgets));
+            localStorage.setItem('mibolsillo_pockets', JSON.stringify(state.pockets));
         }
 
         function changeMonth(offset) {
@@ -304,19 +329,151 @@
             if(id === 'transaction-modal') { document.getElementById('tx-date').value = `${state.selectedMonth}-01`; updateCategorySelect(); }
             if(id === 'budget-modal') renderBudgetInputs();
             if(id === 'category-modal') renderCategoriesEditList();
+            if(id === 'pocket-modal') renderPocketsManager();
         }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+        // --- MANEJO DE BOLSILLOS PERSISTENTES ---
+        function handleCreatePocket(e) {
+            e.preventDefault();
+            const name = document.getElementById('pocket-name').value.trim();
+            if(!name) return;
+            if(state.pockets[name] !== undefined) { alert('Ya existe un bolsillo con ese nombre'); return; }
+            state.pockets[name] = 0;
+            saveState();
+            document.getElementById('pocket-name').value = '';
+            renderApp();
+            renderPocketsManager();
+        }
+
+        function transferToPocket(pocketName) {
+            const amount = parseFloat(prompt(`Monto a ingresar en "${pocketName}":`)) || 0;
+            if(amount <= 0) return;
+
+            let totalInc = 0, totalExp = 0;
+            state.transactions.forEach(t => {
+                if(t.type === 'income') totalInc += Number(t.amount);
+                else totalExp += Number(t.amount);
+            });
+            let totalPockets = Object.values(state.pockets).reduce((a, b) => a + b, 0);
+            let available = totalInc - totalExp - totalPockets;
+
+            if(amount > available) {
+                alert('No tienes suficiente saldo disponible para ahorrar esa suma.');
+                return;
+            }
+
+            state.pockets[pocketName] += amount;
+            saveState();
+            renderApp();
+            renderPocketsManager();
+        }
+
+        function transferFromPocket(pocketName) {
+            const amount = parseFloat(prompt(`Monto a retirar de "${pocketName}" hacia tu saldo disponible:`)) || 0;
+            if(amount <= 0) return;
+
+            if(amount > state.pockets[pocketName]) {
+                alert('El monto ingresado supera lo que tienes guardado en este bolsillo.');
+                return;
+            }
+
+            state.pockets[pocketName] -= amount;
+            saveState();
+            renderApp();
+            renderPocketsManager();
+        }
+
+        function deletePocket(pocketName) {
+            if(confirm(`¿Deseas eliminar el bolsillo "${pocketName}"? El valor guardado regresará a tu saldo disponible.`)) {
+                delete state.pockets[pocketName];
+                saveState();
+                renderApp();
+                renderPocketsManager();
+            }
+        }
+
+        function renderPocketsManager() {
+            const list = document.getElementById('pockets-manager-list');
+            list.innerHTML = '';
+            const keys = Object.keys(state.pockets);
+            if(keys.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">No hay bolsillos registrados</p>';
+                return;
+            }
+            keys.forEach(pocket => {
+                list.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl space-y-2 text-xs">
+                        <div class="flex justify-between items-center font-bold">
+                            <span class="text-emerald-500 flex items-center gap-1.5"><i class="fa-solid fa-piggy-bank"></i> ${pocket}</span>
+                            <span>${formatCOP(state.pockets[pocket])}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="transferToPocket('${pocket}')" class="w-1/3 py-1.5 bg-indigo-600 text-white rounded font-medium">+ Ahorrar</button>
+                            <button onclick="transferFromPocket('${pocket}')" class="w-1/3 py-1.5 bg-amber-600 text-white rounded font-medium">- Retirar</button>
+                            <button onclick="deletePocket('${pocket}')" class="w-1/3 py-1.5 bg-rose-600 text-white rounded font-medium">Borrar</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderApp() {
+            document.getElementById('month-picker').value = state.selectedMonth;
+            
+            let totalInc = 0, totalExp = 0;
+            state.transactions.forEach(t => {
+                if(t.type === 'income') totalInc += Number(t.amount);
+                else totalExp += Number(t.amount);
+            });
+
+            const monthTx = state.transactions.filter(t => t.date.startsWith(state.selectedMonth));
+            let monthInc = 0, monthExp = 0;
+            monthTx.forEach(t => {
+                if(t.type === 'income') monthInc += Number(t.amount);
+                else monthExp += Number(t.amount);
+            });
+
+            let totalPockets = Object.values(state.pockets).reduce((a, b) => a + b, 0);
+            let realAvailable = totalInc - totalExp - totalPockets;
+
+            document.getElementById('total-balance').textContent = formatCOP(realAvailable);
+            document.getElementById('total-pockets').textContent = formatCOP(totalPockets);
+            document.getElementById('monthly-income').textContent = formatCOP(monthInc);
+            document.getElementById('monthly-expense').textContent = formatCOP(monthExp);
+
+            renderPocketsList();
+            renderBudgetsProgress(monthTx);
+            renderTransactions(monthTx);
+        }
+
+        function renderPocketsList() {
+            const container = document.getElementById('pockets-container');
+            container.innerHTML = '';
+            const keys = Object.keys(state.pockets);
+            if(keys.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">Sin bolsillos activos</p>';
+                return;
+            }
+            keys.forEach(pocket => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2.5 rounded-xl text-xs">
+                        <span class="font-medium flex items-center gap-1.5"><i class="fa-solid fa-piggy-bank text-emerald-500"></i> ${pocket}</span>
+                        <span class="font-bold text-emerald-500">${formatCOP(state.pockets[pocket])}</span>
+                    </div>
+                `;
+            });
+        }
+
         function renderCategoriesEditList() {
             const list = document.getElementById('categories-edit-list');
             list.innerHTML = '';
-            const cats = getCurrentCategories();
-            cats.forEach((cat, index) => {
+            getCurrentCategories().forEach((cat, index) => {
                 list.innerHTML += `
                     <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded-lg text-xs">
                         <input type="text" value="${cat}" onchange="renameCategory(${index}, this.value)" class="bg-white dark:bg-slate-700 px-2 py-1 border rounded text-xs w-2/3">
-                        <button onclick="deleteCategory(${index})" class="text-rose-500 hover:text-rose-700 px-2 py-1 font-bold">Borrar</button>
+                        <button onclick="deleteCategory(${index})" class="text-rose-500 px-2 py-1 font-bold">Borrar</button>
                     </div>
                 `;
             });
@@ -324,19 +481,13 @@
 
         function renameCategory(index, newName) {
             const cats = getCurrentCategories();
-            const oldName = cats[index];
             if (!newName.trim()) return;
             cats[index] = newName.trim();
-            if (state.budgets[`${state.selectedMonth}_${oldName}`]) {
-                state.budgets[`${state.selectedMonth}_${newName.trim()}`] = state.budgets[`${state.selectedMonth}_${oldName}`];
-                delete state.budgets[`${state.selectedMonth}_${oldName}`];
-            }
             saveState(); renderApp();
         }
 
         function deleteCategory(index) {
-            const cats = getCurrentCategories();
-            cats.splice(index, 1);
+            getCurrentCategories().splice(index, 1);
             saveState(); renderApp(); renderCategoriesEditList();
         }
 
@@ -354,20 +505,6 @@
             renderCategoriesEditList();
         }
 
-        function renderApp() {
-            document.getElementById('month-picker').value = state.selectedMonth;
-            const monthTx = state.transactions.filter(t => t.date.startsWith(state.selectedMonth));
-            let inc = 0, exp = 0;
-            monthTx.forEach(t => { if(t.type === 'income') inc += Number(t.amount); else exp += Number(t.amount); });
-
-            document.getElementById('total-balance').textContent = formatCOP(inc - exp);
-            document.getElementById('monthly-income').textContent = formatCOP(inc);
-            document.getElementById('monthly-expense').textContent = formatCOP(exp);
-
-            renderBudgetsProgress(monthTx);
-            renderTransactions(monthTx);
-        }
-
         function renderBudgetsProgress(monthTx) {
             const container = document.getElementById('budgets-container');
             container.innerHTML = '';
@@ -379,39 +516,18 @@
                 const spent = expenseTotals[cat] || 0;
                 const percentage = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 100) : 0;
 
-                const item = document.createElement('div');
-                item.className = "space-y-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-2 rounded-lg transition-colors";
-                item.onclick = () => openCategoryDetail(cat);
-                item.innerHTML = `
-                    <div class="flex justify-between text-xs font-medium">
-                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-tag text-indigo-500"></i> ${cat}</span>
-                        <span>${formatCOP(spent)} / ${formatCOP(limit)}</span>
-                    </div>
-                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                        <div class="bg-indigo-500 h-full rounded-full" style="width: ${percentage}%"></div>
+                container.innerHTML += `
+                    <div class="space-y-1 p-1 rounded-lg">
+                        <div class="flex justify-between text-xs font-medium">
+                            <span>${cat}</span>
+                            <span>${formatCOP(spent)} / ${formatCOP(limit)}</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-indigo-500 h-full rounded-full" style="width: ${percentage}%"></div>
+                        </div>
                     </div>
                 `;
-                container.appendChild(item);
             });
-        }
-
-        function openCategoryDetail(catName) {
-            document.getElementById('cat-detail-title').innerHTML = `<i class="fa-solid fa-tag text-indigo-500"></i> ${catName}`;
-            const monthTx = state.transactions.filter(t => t.category === catName && t.date.startsWith(state.selectedMonth));
-            const spent = monthTx.reduce((acc, curr) => acc + Number(curr.amount), 0);
-            const limit = state.budgets[`${state.selectedMonth}_${catName}`] || 0;
-
-            document.getElementById('cat-detail-summary').innerHTML = `
-                <div class="flex justify-between"><span>Gastado este mes:</span><span class="font-bold">${formatCOP(spent)}</span></div>
-                <div class="flex justify-between"><span>Tope del mes:</span><span class="font-bold">${formatCOP(limit)}</span></div>
-            `;
-
-            const listEl = document.getElementById('cat-detail-tx-list');
-            listEl.innerHTML = monthTx.length === 0 ? '<p class="text-xs text-slate-400 text-center py-2">Sin movimientos</p>' : '';
-            monthTx.forEach(tx => {
-                listEl.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-800 p-2 rounded"><span>${tx.desc || catName}</span><span class="font-bold text-rose-500">-${formatCOP(tx.amount)}</span></div>`;
-            });
-            document.getElementById('category-detail-modal').classList.remove('hidden');
         }
 
         function renderBudgetInputs() {
@@ -420,9 +536,9 @@
             getCurrentCategories().forEach(cat => {
                 const val = state.budgets[`${state.selectedMonth}_${cat}`] || 0;
                 container.innerHTML += `
-                    <div class="flex items-center justify-between space-x-3">
-                        <label class="text-xs font-medium w-1/3">${cat}</label>
-                        <input type="number" data-category="${cat}" value="${val}" class="budget-input w-2/3 px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs">
+                    <div class="flex items-center justify-between space-x-3 text-xs">
+                        <label class="w-1/3">${cat}</label>
+                        <input type="number" data-category="${cat}" value="${val}" class="budget-input w-2/3 px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg">
                     </div>
                 `;
             });
@@ -431,8 +547,7 @@
         function handleBudgetSubmit(e) {
             e.preventDefault();
             document.querySelectorAll('.budget-input').forEach(input => {
-                const cat = input.getAttribute('data-category');
-                state.budgets[`${state.selectedMonth}_${cat}`] = parseFloat(input.value) || 0;
+                state.budgets[`${state.selectedMonth}_${input.getAttribute('data-category')}`] = parseFloat(input.value) || 0;
             });
             saveState(); renderApp(); closeModal('budget-modal');
         }
@@ -466,13 +581,11 @@
             let filtered = state.filter === 'all' ? monthTx : monthTx.filter(t => t.type === state.filter);
             filtered.forEach(tx => {
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
+                    <div class="bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs">
                         <div><p class="font-bold">${tx.category}</p><p class="text-[10px] text-slate-400">${tx.date} - ${tx.desc || ''}</p></div>
-                        <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-2">
                             <span class="font-bold ${tx.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}">${tx.type === 'income' ? '+' : '-'}${formatCOP(tx.amount)}</span>
-                            <button onclick="deleteTransaction(${tx.id})" class="text-slate-400 hover:text-rose-500 p-1" title="Eliminar">
-                                <i class="fa-solid fa-trash-can text-xs"></i>
-                            </button>
+                            <button onclick="deleteTransaction(${tx.id})" class="text-slate-400 hover:text-rose-500 p-1"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
