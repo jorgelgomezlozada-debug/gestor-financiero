@@ -1,0 +1,13 @@
+{
+  "background_color": "#2c831d",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "control",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Con",
+  "start_url": "/",
+  "theme_color": "#881d1d",
+  "description": "control de gastos",
+  "id": "control"
+}
