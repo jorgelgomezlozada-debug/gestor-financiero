@@ -1,13 +1,19 @@
 {
-  "background_color": "#2c831d",
-  "dir": "ltr",
+  "name": "Gestor Financiero COP",
+  "short_name": "Gestor COP",
+  "description": "Control de ingresos, egresos y presupuestos en pesos colombianos",
+  "start_url": "./index.html",
   "display": "standalone",
-  "name": "control",
-  "orientation": "any",
-  "scope": "/",
-  "short_name": "Con",
-  "start_url": "/",
-  "theme_color": "#881d1d",
-  "description": "control de gastos",
-  "id": "control"
+  "background_color": "#f4f6f9",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "id": "/gestor-financiero/",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2845/2845700.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
