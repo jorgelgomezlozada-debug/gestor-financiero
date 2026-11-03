@@ -320,7 +320,6 @@
             return '$ ' + Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        // Función para formatear con puntos mientras se escribe en los inputs de montos
         function formatAmountInput(input) {
             let value = input.value.replace(/\D/g, "");
             if (value === "") {
@@ -380,7 +379,6 @@
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
             if(id === 'transaction-modal') { 
-                // Asignar fecha actual por defecto y limpiar campos al abrir
                 document.getElementById('tx-date').value = todayFormatted; 
                 document.getElementById('tx-amount').value = '';
                 document.getElementById('tx-desc').value = '';
@@ -698,7 +696,6 @@
             saveState(); 
             renderApp(); 
             
-            // Limpiar campos de monto y descripción y resetear fecha a hoy para seguir ingresando
             document.getElementById('tx-amount').value = '';
             document.getElementById('tx-desc').value = '';
             document.getElementById('tx-date').value = todayFormatted;
@@ -730,6 +727,9 @@
             } else {
                 badge.classList.add('hidden');
             }
+
+            // ORDENAR MOVIMIENTOS POR FECHA (De más reciente a más antiguo)
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (filtered.length === 0) {
                 container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No hay movimientos registrados</p>';
