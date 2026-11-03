@@ -4,14 +4,16 @@
   "description": "Control de ingresos y egresos en pesos colombianos",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f4f6f9",
-  "theme_color": "#4f46e5",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
   "orientation": "portrait",
+  "id": "/gestor-financiero/",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2845/2845700.png",
+      "src": "https://img.icons8.com/emoji/512/heart-with-ribbon-emoji.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
