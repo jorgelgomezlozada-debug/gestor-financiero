@@ -1,7 +1,7 @@
 {
   "name": "Gestor Financiero COP",
   "short_name": "Gestor COP",
-  "description": "Control de ingresos, egresos y presupuestos en pesos colombianos",
+  "description": "Control de ingresos y egresos en pesos colombianos",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f6f9",
@@ -10,10 +10,9 @@
   "id": "/gestor-financiero/",
   "icons": [
     {
-      "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4b8.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/2845/2845700.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
