@@ -194,7 +194,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1">Monto ($ COP)</label>
-                    <input type="number" step="1" id="tx-amount" required placeholder="0" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-slate-800 dark:text-white font-semibold">
+                    <input type="text" id="tx-amount" required placeholder="0" oninput="formatAmountInput(this)" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-slate-800 dark:text-white font-semibold text-lg">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1">Categoría</label>
@@ -241,7 +241,7 @@
             </div>
             <form onsubmit="handleCategoryAdd(event)" class="space-y-3 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl">
                 <input type="text" id="new-cat-name" required placeholder="Nombre de categoría..." class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
-                <input type="number" step="1" id="new-cat-budget" placeholder="Tope mensual ($ COP)" class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
+                <input type="text" id="new-cat-budget" placeholder="Tope mensual ($ COP)" oninput="formatAmountInput(this)" class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
                 <button type="submit" class="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg">+ Agregar Categoría</button>
             </form>
             <div id="categories-edit-list" class="space-y-2"></div>
@@ -290,6 +290,7 @@
 
         const today = new Date();
         const initialMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        const todayFormatted = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
         let state = {
             monthlyCategories: JSON.parse(localStorage.getItem('mibolsillo_m_categories')) || {},
@@ -304,10 +305,8 @@
 
         function getCurrentCategories() {
             if (!state.monthlyCategories[state.selectedMonth]) {
-                // Si el mes no tiene categorías guardadas, inicializa con las 11 fijas
                 state.monthlyCategories[state.selectedMonth] = [...DEFAULT_CATEGORIES];
             } else {
-                // Asegurar que si falta alguna de las nuevas esenciales en meses ya creados, se añada
                 DEFAULT_CATEGORIES.forEach(defCat => {
                     if (!state.monthlyCategories[state.selectedMonth].includes(defCat)) {
                         state.monthlyCategories[state.selectedMonth].push(defCat);
@@ -319,6 +318,21 @@
 
         function formatCOP(amount) {
             return '$ ' + Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Función para formatear con puntos mientras se escribe en los inputs de montos
+        function formatAmountInput(input) {
+            let value = input.value.replace(/\D/g, "");
+            if (value === "") {
+                input.value = "";
+                return;
+            }
+            input.value = Number(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function getCleanNumber(valueString) {
+            if (!valueString) return 0;
+            return parseFloat(valueString.toString().replace(/\./g, '')) || 0;
         }
 
         function saveState() {
@@ -365,9 +379,19 @@
 
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
-            if(id === 'transaction-modal') { document.getElementById('tx-date').value = `${state.selectedMonth}-01`; updateCategorySelect(); }
+            if(id === 'transaction-modal') { 
+                // Asignar fecha actual por defecto y limpiar campos al abrir
+                document.getElementById('tx-date').value = todayFormatted; 
+                document.getElementById('tx-amount').value = '';
+                document.getElementById('tx-desc').value = '';
+                updateCategorySelect(); 
+            }
             if(id === 'budget-modal') renderBudgetInputs();
-            if(id === 'category-modal') renderCategoriesEditList();
+            if(id === 'category-modal') {
+                document.getElementById('new-cat-name').value = '';
+                document.getElementById('new-cat-budget').value = '';
+                renderCategoriesEditList();
+            }
             if(id === 'pocket-modal') renderPocketsManager();
             if(id === 'total-report-modal') renderTotalReport();
         }
@@ -448,7 +472,8 @@
         }
 
         function transferToPocket(pocketName) {
-            const amount = parseFloat(prompt(`Monto a ingresar en "${pocketName}":`)) || 0;
+            const rawAmount = prompt(`Monto a ingresar en "${pocketName}":`);
+            const amount = getCleanNumber(rawAmount);
             if(amount <= 0) return;
 
             let totalInc = 0, totalExp = 0;
@@ -471,7 +496,8 @@
         }
 
         function transferFromPocket(pocketName) {
-            const amount = parseFloat(prompt(`Monto a retirar de "${pocketName}" hacia tu saldo disponible:`)) || 0;
+            const rawAmount = prompt(`Monto a retirar de "${pocketName}" hacia tu saldo disponible:`);
+            const amount = getCleanNumber(rawAmount);
             if(amount <= 0) return;
 
             if(amount > state.pockets[pocketName]) {
@@ -594,7 +620,8 @@
         function handleCategoryAdd(e) {
             e.preventDefault();
             const name = document.getElementById('new-cat-name').value.trim();
-            const budget = parseFloat(document.getElementById('new-cat-budget').value) || 0;
+            const budgetInput = document.getElementById('new-cat-budget').value;
+            const budget = getCleanNumber(budgetInput);
             if(!name) return;
             const cats = getCurrentCategories();
             if(!cats.includes(name)) cats.push(name);
@@ -636,10 +663,11 @@
             container.innerHTML = '';
             getCurrentCategories().forEach(cat => {
                 const val = state.budgets[`${state.selectedMonth}_${cat}`] || 0;
+                const formattedVal = val > 0 ? val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '';
                 container.innerHTML += `
                     <div class="flex items-center justify-between space-x-3 text-xs">
                         <label class="w-1/3">${cat}</label>
-                        <input type="number" data-category="${cat}" value="${val}" class="budget-input w-2/3 px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg">
+                        <input type="text" data-category="${cat}" value="${formattedVal}" oninput="formatAmountInput(this)" class="budget-input w-2/3 px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg">
                     </div>
                 `;
             });
@@ -648,22 +676,33 @@
         function handleBudgetSubmit(e) {
             e.preventDefault();
             document.querySelectorAll('.budget-input').forEach(input => {
-                state.budgets[`${state.selectedMonth}_${input.getAttribute('data-category')}`] = parseFloat(input.value) || 0;
+                state.budgets[`${state.selectedMonth}_${input.getAttribute('data-category')}`] = getCleanNumber(input.value);
             });
             saveState(); renderApp(); closeModal('budget-modal');
         }
 
         function handleTransactionSubmit(e) {
             e.preventDefault();
+            const rawAmount = document.getElementById('tx-amount').value;
+            const cleanAmount = getCleanNumber(rawAmount);
+            if (cleanAmount <= 0) return;
+
             state.transactions.push({
                 id: Date.now(),
                 type: state.currentType,
-                amount: parseFloat(document.getElementById('tx-amount').value),
+                amount: cleanAmount,
                 category: document.getElementById('tx-category').value,
-                date: document.getElementById('tx-date' ).value,
+                date: document.getElementById('tx-date').value,
                 desc: document.getElementById('tx-desc').value
             });
-            saveState(); renderApp(); closeModal('transaction-modal');
+            saveState(); 
+            renderApp(); 
+            
+            // Limpiar campos de monto y descripción y resetear fecha a hoy para seguir ingresando
+            document.getElementById('tx-amount').value = '';
+            document.getElementById('tx-desc').value = '';
+            document.getElementById('tx-date').value = todayFormatted;
+            document.getElementById('tx-amount').focus();
         }
 
         function deleteTransaction(id) {
