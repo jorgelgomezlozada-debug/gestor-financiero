@@ -1,9 +1,14 @@
-<!DOCTYPE html>
+nt.getElementById('monthly-expense').textContent = formatCOP(exp);
+
+            renderBudgetsProgress(monthTx);
+           <!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Control Financiero</title>
+    <title>Control Financiero COP</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#6366f1">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,8 +24,8 @@
         
         <header class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">
-                    <i class="fa-solid fa-wallet"></i>
+                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">
+                    ❤️
                 </div>
                 <div>
                     <h1 class="text-lg font-bold leading-tight">MiBolsillo</h1>
@@ -31,7 +36,7 @@
                 <button onclick="openModal('backup-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Respaldo">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                 </button>
-                <button onclick="openModal('category-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Nueva Categoría">
+                <button onclick="openModal('category-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Gestionar Categorías">
                     <i class="fa-solid fa-folder-plus"></i>
                 </button>
                 <button onclick="openModal('budget-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm" title="Gestionar Topes">
@@ -82,8 +87,9 @@
             <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-indigo-500"></i> Topes por Categoría
+                        <i class="fa-solid fa-chart-pie text-indigo-500"></i> Topes del Mes
                     </h3>
+                    <button onclick="openModal('category-modal')" class="text-xs text-indigo-500 font-semibold hover:underline">Editar Categorías</button>
                 </div>
                 <div id="budgets-container" class="space-y-3"></div>
             </section>
@@ -125,7 +131,7 @@
         </nav>
     </div>
 
-    <!-- MODAL TRANSACCIÓN -->
+    <!-- MODAL REGISTRO TRANSACCIÓN -->
     <div id="transaction-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -151,10 +157,34 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1">Descripción</label>
-                    <input type="text" id="tx-desc" placeholder="Detalle..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-slate-800 dark:text-white">
+                    <input type="text" id="tx-desc" placeholder="Detalle opcional..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-slate-800 dark:text-white">
                 </div>
                 <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl shadow-md">Guardar</button>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL GESTIÓN Y EDICIÓN DE CATEGORÍAS -->
+    <div id="category-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="text-base font-bold text-slate-800 dark:text-white">Categorías del Mes</h3>
+                <button onclick="closeModal('category-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <form onsubmit="handleCategoryAdd(event)" class="space-y-3 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl">
+                    <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Crear Categoría para este Mes</p>
+                    <input type="text" id="new-cat-name" required placeholder="Ej. Mercado, Cumpleaños..." class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
+                    <input type="number" step="1" id="new-cat-budget" placeholder="Tope inicial (opcional)" class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
+                    <button type="submit" class="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg">+ Agregar Categoría</button>
+                </form>
+
+                <div class="space-y-2">
+                    <p class="text-xs font-bold text-slate-500">Categorías Existentes (Editar / Eliminar)</p>
+                    <div id="categories-edit-list" class="space-y-2"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -162,33 +192,12 @@
     <div id="budget-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white">Gestionar Topes Mensuales</h3>
+                <h3 class="text-base font-bold text-slate-800 dark:text-white">Gestionar Topes del Mes</h3>
                 <button onclick="closeModal('budget-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="handleBudgetSubmit(event)" class="space-y-4">
                 <div id="budget-inputs-list" class="space-y-3"></div>
                 <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl shadow-md">Actualizar Topes</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL NUEVA CATEGORÍA -->
-    <div id="category-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white">Nueva Categoría</h3>
-                <button onclick="closeModal('category-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form onsubmit="handleCategorySubmit(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium mb-1">Nombre</label>
-                    <input type="text" id="cat-name" required placeholder="Ej. Mascotas" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-slate-800 dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium mb-1">Tope Mensual ($ COP)</label>
-                    <input type="number" step="1" id="cat-budget" placeholder="200000" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-slate-800 dark:text-white">
-                </div>
-                <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl shadow-md">Crear Categoría</button>
             </form>
         </div>
     </div>
@@ -202,7 +211,7 @@
             </div>
             <div id="cat-detail-summary" class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border mb-4 space-y-2 text-xs"></div>
             <div class="space-y-3">
-                <h4 class="text-xs font-bold uppercase text-slate-400">Movimientos</h4>
+                <h4 class="text-xs font-bold uppercase text-slate-400">Movimientos del Mes</h4>
                 <div id="cat-detail-tx-list" class="space-y-2"></div>
             </div>
         </div>
@@ -224,40 +233,37 @@
     </div>
 
     <script>
-        const INITIAL_CATEGORIES = {
-            expense: [
-                { name: 'Comida', icon: 'fa-utensils' },
-                { name: 'Transporte', icon: 'fa-car' },
-                { name: 'Ocio', icon: 'fa-gamepad' },
-                { name: 'Servicios', icon: 'fa-bolt' },
-                { name: 'Salud', icon: 'fa-kit-medical' },
-                { name: 'Otros', icon: 'fa-tag' }
-            ],
-            income: [
-                { name: 'Salario', icon: 'fa-briefcase' },
-                { name: 'Freelance', icon: 'fa-laptop-code' },
-                { name: 'Otros', icon: 'fa-circle-plus' }
-            ]
-        };
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+        }
+
+        const DEFAULT_CATEGORIES = ['Mercado', 'Comida', 'Transporte', 'Ocio', 'Servicios', 'Otros'];
 
         const today = new Date();
         const initialMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
         let state = {
-            categories: JSON.parse(localStorage.getItem('mibolsillo_categories')) || INITIAL_CATEGORIES,
+            monthlyCategories: JSON.parse(localStorage.getItem('mibolsillo_m_categories')) || {},
             transactions: JSON.parse(localStorage.getItem('mibolsillo_transactions')) || [],
-            budgets: JSON.parse(localStorage.getItem('mibolsillo_budgets')) || { 'Comida': 800000, 'Transporte': 300000, 'Ocio': 400000, 'Servicios': 350000, 'Salud': 200000, 'Otros': 150000 },
+            budgets: JSON.parse(localStorage.getItem('mibolsillo_budgets')) || {},
             selectedMonth: initialMonth,
             currentType: 'expense',
             filter: 'all'
         };
+
+        function getCurrentCategories() {
+            if (!state.monthlyCategories[state.selectedMonth]) {
+                state.monthlyCategories[state.selectedMonth] = [...DEFAULT_CATEGORIES];
+            }
+            return state.monthlyCategories[state.selectedMonth];
+        }
 
         function formatCOP(amount) {
             return '$ ' + Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
         function saveState() {
-            localStorage.setItem('mibolsillo_categories', JSON.stringify(state.categories));
+            localStorage.setItem('mibolsillo_m_categories', JSON.stringify(state.monthlyCategories));
             localStorage.setItem('mibolsillo_transactions', JSON.stringify(state.transactions));
             localStorage.setItem('mibolsillo_budgets', JSON.stringify(state.budgets));
         }
@@ -281,20 +287,75 @@
         function updateCategorySelect() {
             const select = document.getElementById('tx-category');
             select.innerHTML = '';
-            state.categories[state.currentType].forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.name; opt.textContent = c.name;
-                select.appendChild(opt);
-            });
+            if (state.currentType === 'expense') {
+                getCurrentCategories().forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c; opt.textContent = c;
+                    select.appendChild(opt);
+                });
+            } else {
+                ['Salario', 'Freelance', 'Otros'].forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c; opt.textContent = c;
+                    select.appendChild(opt);
+                });
+            }
         }
 
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
             if(id === 'transaction-modal') { document.getElementById('tx-date').value = `${state.selectedMonth}-01`; updateCategorySelect(); }
             if(id === 'budget-modal') renderBudgetInputs();
+            if(id === 'category-modal') renderCategoriesEditList();
         }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function renderCategoriesEditList() {
+            const list = document.getElementById('categories-edit-list');
+            list.innerHTML = '';
+            const cats = getCurrentCategories();
+            cats.forEach((cat, index) => {
+                list.innerHTML += `
+                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded-lg text-xs">
+                        <input type="text" value="${cat}" onchange="renameCategory(${index}, this.value)" class="bg-white dark:bg-slate-700 px-2 py-1 border rounded text-xs w-2/3">
+                        <button onclick="deleteCategory(${index})" class="text-rose-500 hover:text-rose-700 px-2 py-1 font-bold">Borrar</button>
+                    </div>
+                `;
+            });
+        }
+
+        function renameCategory(index, newName) {
+            const cats = getCurrentCategories();
+            const oldName = cats[index];
+            if (!newName.trim()) return;
+            cats[index] = newName.trim();
+            if (state.budgets[`${state.selectedMonth}_${oldName}`]) {
+                state.budgets[`${state.selectedMonth}_${newName.trim()}`] = state.budgets[`${state.selectedMonth}_${oldName}`];
+                delete state.budgets[`${state.selectedMonth}_${oldName}`];
+            }
+            saveState(); renderApp();
+        }
+
+        function deleteCategory(index) {
+            const cats = getCurrentCategories();
+            cats.splice(index, 1);
+            saveState(); renderApp(); renderCategoriesEditList();
+        }
+
+        function handleCategoryAdd(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-cat-name').value.trim();
+            const budget = parseFloat(document.getElementById('new-cat-budget').value) || 0;
+            if(!name) return;
+            const cats = getCurrentCategories();
+            if(!cats.includes(name)) cats.push(name);
+            if(budget > 0) state.budgets[`${state.selectedMonth}_${name}`] = budget;
+            saveState(); renderApp();
+            document.getElementById('new-cat-name').value = '';
+            document.getElementById('new-cat-budget').value = '';
+            renderCategoriesEditList();
+        }
 
         function renderApp() {
             document.getElementById('month-picker').value = state.selectedMonth;
@@ -308,6 +369,141 @@
 
             renderBudgetsProgress(monthTx);
             renderTransactions(monthTx);
+        }
+
+        function renderBudgetsProgress(monthTx) {
+            const container = document.getElementById('budgets-container');
+            container.innerHTML = '';
+            const expenseTotals = {};
+            monthTx.filter(t => t.type === 'expense').forEach(t => { expenseTotals[t.category] = (expenseTotals[t.category] || 0) + Number(t.amount); });
+
+            getCurrentCategories().forEach(cat => {
+                const limit = state.budgets[`${state.selectedMonth}_${cat}`] || 0;
+                const spent = expenseTotals[cat] || 0;
+                const percentage = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 100) : 0;
+
+                const item = document.createElement('div');
+                item.className = "space-y-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-2 rounded-lg transition-colors";
+                item.onclick = () => openCategoryDetail(cat);
+                item.innerHTML = `
+                    <div class="flex justify-between text-xs font-medium">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-tag text-indigo-500"></i> ${cat}</span>
+                        <span>${formatCOP(spent)} / ${formatCOP(limit)}</span>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                        <div class="bg-indigo-500 h-full rounded-full" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function openCategoryDetail(catName) {
+            document.getElementById('cat-detail-title').innerHTML = `<i class="fa-solid fa-tag text-indigo-500"></i> ${catName}`;
+            const monthTx = state.transactions.filter(t => t.category === catName && t.date.startsWith(state.selectedMonth));
+            const spent = monthTx.reduce((acc, curr) => acc + Number(curr.amount), 0);
+            const limit = state.budgets[`${state.selectedMonth}_${catName}`] || 0;
+
+            document.getElementById('cat-detail-summary').innerHTML = `
+                <div class="flex justify-between"><span>Gastado este mes:</span><span class="font-bold">${formatCOP(spent)}</span></div>
+                <div class="flex justify-between"><span>Tope del mes:</span><span class="font-bold">${formatCOP(limit)}</span></div>
+            `;
+
+            const listEl = document.getElementById('cat-detail-tx-list');
+            listEl.innerHTML = monthTx.length === 0 ? '<p class="text-xs text-slate-400 text-center py-2">Sin movimientos</p>' : '';
+            monthTx.forEach(tx => {
+                listEl.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-800 p-2 rounded"><span>${tx.desc || catName}</span><span class="font-bold text-rose-500">-${formatCOP(tx.amount)}</span></div>`;
+            });
+            document.getElementById('category-detail-modal').classList.remove('hidden');
+        }
+
+        function renderBudgetInputs() {
+            const container = document.getElementById('budget-inputs-list');
+            container.innerHTML = '';
+            getCurrentCategories().forEach(cat => {
+                const val = state.budgets[`${state.selectedMonth}_${cat}`] || 0;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between space-x-3">
+                        <label class="text-xs font-medium w-1/3">${cat}</label>
+                        <input type="number" data-category="${cat}" value="${val}" class="budget-input w-2/3 px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs">
+                    </div>
+                `;
+            });
+        }
+
+        function handleBudgetSubmit(e) {
+            e.preventDefault();
+            document.querySelectorAll('.budget-input').forEach(input => {
+                const cat = input.getAttribute('data-category');
+                state.budgets[`${state.selectedMonth}_${cat}`] = parseFloat(input.value) || 0;
+            });
+            saveState(); renderApp(); closeModal('budget-modal');
+        }
+
+        function handleTransactionSubmit(e) {
+            e.preventDefault();
+            state.transactions.push({
+                id: Date.now(),
+                type: state.currentType,
+                amount: parseFloat(document.getElementById('tx-amount').value),
+                category: document.getElementById('tx-category').value,
+                date: document.getElementById('tx-date').value,
+                desc: document.getElementById('tx-desc').value
+            });
+            saveState(); renderApp(); closeModal('transaction-modal');
+        }
+
+        function deleteTransaction(id) {
+            state.transactions = state.transactions.filter(t => t.id !== id);
+            saveState(); renderApp();
+        }
+
+        function setFilter(type) {
+            state.filter = type;
+            renderApp();
+        }
+
+        function renderTransactions(monthTx) {
+            const container = document.getElementById('transactions-list');
+            container.innerHTML = '';
+            let filtered = state.filter === 'all' ? monthTx : monthTx.filter(t => t.type === state.filter);
+            filtered.forEach(tx => {
+                container.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
+                        <div><p class="font-bold">${tx.category}</p><p class="text-[10px] text-slate-400">${tx.date} - ${tx.desc || ''}</p></div>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold ${tx.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}">${tx.type === 'income' ? '+' : '-'}${formatCOP(tx.amount)}</span>
+                            <button onclick="deleteTransaction(${tx.id})" class="text-slate-400 hover:text-rose-500 p-1" title="Eliminar">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function exportJSONBackup() {
+            const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `respaldo_${state.selectedMonth}.json`; a.click();
+        }
+
+        function importJSONBackup(event) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const imp = JSON.parse(e.target.result);
+                    if(imp.transactions) { state = imp; saveState(); renderApp(); closeModal('backup-modal'); alert('Restaurado con éxito'); }
+                } catch(err) { alert('Archivo inválido'); }
+            };
+            if(event.target.files[0]) reader.readAsText(event.target.files[0]);
+        }
+
+        window.onload = renderApp;
+    </script>
+</body>
+</html>
+ renderTransactions(monthTx);
         }
 
         function renderBudgetsProgress(monthTx) {
