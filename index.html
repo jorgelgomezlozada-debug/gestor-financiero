@@ -26,7 +26,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold leading-tight">MiBolsillo</h1>
-                    <p class="text-xs text-indigo-200">Control Financiero COP</p>
+                    <p class="text-xs text-indigo-200">Control Financiero COP (Local)</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -176,10 +176,7 @@
                 </div>
                 <button onclick="closeModal('total-report-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
-            <div id="total-report-list" class="space-y-3">
-                <!-- Inyectado por JS -->
-            </div>
+            <div id="total-report-list" class="space-y-3"></div>
         </div>
     </div>
 
@@ -223,13 +220,11 @@
                 <h3 class="text-base font-bold text-slate-800 dark:text-white">🐷 Bolsillos de Ahorro</h3>
                 <button onclick="closeModal('pocket-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-
             <form onsubmit="handleCreatePocket(event)" class="space-y-3 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl">
                 <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Crear Nuevo Bolsillo</p>
-                <input type="text" id="pocket-name" required placeholder="Ej. Viaje Cartagena, Fondo de Emergencia..." class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
+                <input type="text" id="pocket-name" required placeholder="Ej. Viaje Cartagena..." class="w-full px-3 py-2 bg-white dark:bg-slate-700 border rounded-lg text-xs">
                 <button type="submit" class="w-full py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg">+ Crear Bolsillo</button>
             </form>
-
             <div class="space-y-3">
                 <p class="text-xs font-bold text-slate-500">Mover Dinero (Saldo Disponible ⇄ Bolsillo)</p>
                 <div id="pockets-manager-list" class="space-y-3"></div>
@@ -271,7 +266,7 @@
     <div id="backup-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white">Respaldo de Datos</h3>
+                <h3 class="text-base font-bold text-slate-800 dark:text-white">Respaldo de Datos (Local)</h3>
                 <button onclick="closeModal('backup-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <button onclick="exportJSONBackup()" class="w-full py-3 px-4 bg-emerald-600 text-white rounded-xl text-xs font-bold">📥 Descargar Respaldo JSON</button>
@@ -287,7 +282,12 @@
             navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
         }
 
-        const DEFAULT_CATEGORIES = ['Ortodoncia', 'Mercado', 'Comida', 'Transporte', 'Ocio', 'Servicios', 'Otros'];
+        const DEFAULT_CATEGORIES = [
+            'Arriendo', 'Servicios', 'Internet', 'Transporte', 
+            'Mercado', 'Salidas', 'Compras', 'Ortodoncia', 
+            'Mascota', 'Cuota de manejo', 'Pastillas'
+        ];
+
         const today = new Date();
         const initialMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
@@ -304,11 +304,15 @@
 
         function getCurrentCategories() {
             if (!state.monthlyCategories[state.selectedMonth]) {
+                // Si el mes no tiene categorías guardadas, inicializa con las 11 fijas
                 state.monthlyCategories[state.selectedMonth] = [...DEFAULT_CATEGORIES];
             } else {
-                if(!state.monthlyCategories[state.selectedMonth].includes('Ortodoncia')) {
-                    state.monthlyCategories[state.selectedMonth].unshift('Ortodoncia');
-                }
+                // Asegurar que si falta alguna de las nuevas esenciales en meses ya creados, se añada
+                DEFAULT_CATEGORIES.forEach(defCat => {
+                    if (!state.monthlyCategories[state.selectedMonth].includes(defCat)) {
+                        state.monthlyCategories[state.selectedMonth].push(defCat);
+                    }
+                });
             }
             return state.monthlyCategories[state.selectedMonth];
         }
@@ -656,7 +660,7 @@
                 type: state.currentType,
                 amount: parseFloat(document.getElementById('tx-amount').value),
                 category: document.getElementById('tx-category').value,
-                date: document.getElementById('tx-date').value,
+                date: document.getElementById('tx-date' ).value,
                 desc: document.getElementById('tx-desc').value
             });
             saveState(); renderApp(); closeModal('transaction-modal');
@@ -709,7 +713,7 @@
         function exportJSONBackup() {
             const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = `respaldo_${state.selectedMonth}.json`; a.click();
+            a.download = `respaldo_local_${state.selectedMonth}.json`; a.click();
         }
 
         function importJSONBackup(event) {
@@ -717,7 +721,7 @@
             reader.onload = e => {
                 try {
                     const imp = JSON.parse(e.target.result);
-                    if(imp.transactions) { state = imp; saveState(); renderApp(); closeModal('backup-modal'); alert('Restaurado con éxito'); }
+                    if(imp.transactions) { state = imp; saveState(); renderApp(); closeModal('backup-modal'); alert('Respaldo local restaurado con éxito'); }
                 } catch(err) { alert('Archivo inválido'); }
             };
             if(event.target.files[0]) reader.readAsText(event.target.files[0]);
