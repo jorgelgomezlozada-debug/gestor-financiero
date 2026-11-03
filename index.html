@@ -96,21 +96,22 @@
             <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                        <i class="fa-solid fa-piggy-bank text-emerald-500"></i> Mis Bolsillos de Ahorro (Persistentes)
+                        <i class="fa-solid fa-piggy-bank text-emerald-500"></i> Mis Bolsillos de Ahorro
                     </h3>
                     <button onclick="openModal('pocket-modal')" class="text-xs text-indigo-500 font-semibold hover:underline">+ Administrar</button>
                 </div>
-                <div id="pockets-container" class="space-y-2">
-                    <!-- Inyectado por JS -->
-                </div>
+                <div id="pockets-container" class="space-y-2"></div>
             </section>
 
-            <!-- TOPES DEL MES -->
+            <!-- TOPES DEL MES CON FILTRO POR CLIC -->
             <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                        <i class="fa-solid fa-chart-pie text-indigo-500"></i> Topes del Mes
-                    </h3>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-pie text-indigo-500"></i> Topes del Mes
+                        </h3>
+                        <p class="text-[9px] text-slate-400">Toca una categoría para ver sus movimientos</p>
+                    </div>
                     <button onclick="openModal('budget-modal')" class="text-xs text-indigo-500 font-semibold hover:underline">Configurar Topes</button>
                 </div>
                 <div id="budgets-container" class="space-y-2"></div>
@@ -119,7 +120,7 @@
             <!-- MOVIMIENTOS -->
             <section class="space-y-2">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                    <h3 id="transactions-title" class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
                         <i class="fa-solid fa-list-ul text-indigo-500"></i> Movimientos
                     </h3>
                     <div class="flex space-x-1 bg-slate-200 dark:bg-slate-700 p-1 rounded-lg text-[10px]">
@@ -128,17 +129,22 @@
                         <button onclick="setFilter('expense')" id="filter-expense" class="px-2 py-0.5 rounded font-medium text-slate-600 dark:text-slate-300">Egresos</button>
                     </div>
                 </div>
+                <div id="selected-cat-badge" class="hidden flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg text-xs border border-indigo-200 dark:border-indigo-800">
+                    <span class="text-indigo-600 dark:text-indigo-300 font-semibold" id="selected-cat-text">Filtrado por: </span>
+                    <button onclick="clearCategoryFilter()" class="text-indigo-500 text-xs hover:underline font-bold">Ver todos</button>
+                </div>
                 <div id="transactions-list" class="space-y-2"></div>
             </section>
         </main>
 
-        <div class="absolute bottom-6 right-6 z-20">
+        <div class="absolute bottom-16 right-6 z-20">
             <button onclick="openModal('transaction-modal')" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-transform active:scale-95">
                 <i class="fa-solid fa-plus"></i>
             </button>
         </div>
 
-        <nav class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-2.5 flex justify-around items-center text-slate-500 dark:text-slate-400 z-10">
+        <!-- NAVEGACIÓN INFERIOR CON PESTAÑA REPORTE TOTAL -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-4 py-2.5 flex justify-around items-center text-slate-500 dark:text-slate-400 z-10">
             <button onclick="openModal('transaction-modal')" class="flex flex-col items-center hover:text-indigo-600">
                 <i class="fa-solid fa-circle-plus text-lg"></i>
                 <span class="text-[10px] mt-0.5 font-medium">Añadir</span>
@@ -147,11 +153,34 @@
                 <i class="fa-solid fa-piggy-bank text-lg"></i>
                 <span class="text-[10px] mt-0.5 font-medium">Bolsillos</span>
             </button>
+            <button onclick="openModal('total-report-modal')" class="flex flex-col items-center hover:text-indigo-600 text-indigo-600 dark:text-indigo-400">
+                <i class="fa-solid fa-chart-column text-lg"></i>
+                <span class="text-[10px] mt-0.5 font-bold">Reporte Total</span>
+            </button>
             <button onclick="openModal('backup-modal')" class="flex flex-col items-center hover:text-indigo-600">
                 <i class="fa-solid fa-shield-halved text-lg"></i>
                 <span class="text-[10px] mt-0.5 font-medium">Respaldo</span>
             </button>
         </nav>
+    </div>
+
+    <!-- MODAL REPORTE TOTAL HISTÓRICO -->
+    <div id="total-report-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-indigo-500"></i> Acumulado Total Histórico
+                    </h3>
+                    <p class="text-[10px] text-slate-400">Suma total de gastos sin filtrar por mes</p>
+                </div>
+                <button onclick="closeModal('total-report-modal')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div id="total-report-list" class="space-y-3">
+                <!-- Inyectado por JS -->
+            </div>
+        </div>
     </div>
 
     <!-- MODAL TRANSACCIÓN -->
@@ -258,7 +287,7 @@
             navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
         }
 
-        const DEFAULT_CATEGORIES = ['Mercado', 'Comida', 'Transporte', 'Ocio', 'Servicios', 'Otros'];
+        const DEFAULT_CATEGORIES = ['Ortodoncia', 'Mercado', 'Comida', 'Transporte', 'Ocio', 'Servicios', 'Otros'];
         const today = new Date();
         const initialMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
@@ -269,12 +298,17 @@
             pockets: JSON.parse(localStorage.getItem('mibolsillo_pockets')) || { 'Ahorro Principal': 0 },
             selectedMonth: initialMonth,
             currentType: 'expense',
-            filter: 'all'
+            filter: 'all',
+            selectedCategoryFilter: null
         };
 
         function getCurrentCategories() {
             if (!state.monthlyCategories[state.selectedMonth]) {
                 state.monthlyCategories[state.selectedMonth] = [...DEFAULT_CATEGORIES];
+            } else {
+                if(!state.monthlyCategories[state.selectedMonth].includes('Ortodoncia')) {
+                    state.monthlyCategories[state.selectedMonth].unshift('Ortodoncia');
+                }
             }
             return state.monthlyCategories[state.selectedMonth];
         }
@@ -294,10 +328,11 @@
             const [year, month] = state.selectedMonth.split('-').map(Number);
             const date = new Date(year, month - 1 + offset, 1);
             state.selectedMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            state.selectedCategoryFilter = null;
             renderApp();
         }
 
-        function onMonthPickerChange(val) { if(val) { state.selectedMonth = val; renderApp(); } }
+        function onMonthPickerChange(val) { if(val) { state.selectedMonth = val; state.selectedCategoryFilter = null; renderApp(); } }
 
         function setTransactionType(type) {
             state.currentType = type;
@@ -330,9 +365,70 @@
             if(id === 'budget-modal') renderBudgetInputs();
             if(id === 'category-modal') renderCategoriesEditList();
             if(id === 'pocket-modal') renderPocketsManager();
+            if(id === 'total-report-modal') renderTotalReport();
         }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function filterByCategory(categoryName) {
+            state.selectedCategoryFilter = categoryName;
+            renderApp();
+        }
+
+        function clearCategoryFilter() {
+            state.selectedCategoryFilter = null;
+            renderApp();
+        }
+
+        function renderTotalReport() {
+            const container = document.getElementById('total-report-list');
+            container.innerHTML = '';
+
+            const totals = {};
+            let totalGeneralEgresos = 0;
+
+            state.transactions.filter(t => t.type === 'expense').forEach(t => {
+                totals[t.category] = (totals[t.category] || 0) + Number(t.amount);
+                totalGeneralEgresos += Number(t.amount);
+            });
+
+            const sortedCategories = Object.keys(totals).sort((a,b) => totals[b] - totals[a]);
+
+            if (sortedCategories.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No hay gastos registrados en el historial</p>';
+                return;
+            }
+
+            container.innerHTML += `
+                <div class="bg-indigo-600 text-white p-3 rounded-xl mb-3 flex justify-between items-center shadow-sm">
+                    <span class="text-xs font-bold uppercase tracking-wider">Gran Total Gastado</span>
+                    <span class="text-sm font-extrabold">${formatCOP(totalGeneralEgresos)}</span>
+                </div>
+            `;
+
+            sortedCategories.forEach(cat => {
+                const totalAmount = totals[cat];
+                const percentage = totalGeneralEgresos > 0 ? Math.round((totalAmount / totalGeneralEgresos) * 100) : 0;
+                const isOrtodoncia = cat.toLowerCase().includes('ortodoncia');
+
+                container.innerHTML += `
+                    <div class="p-3 ${isOrtodoncia ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700' : 'bg-slate-50 dark:bg-slate-800'} rounded-xl space-y-1.5">
+                        <div class="flex justify-between items-center text-xs font-bold">
+                            <span class="${isOrtodoncia ? 'text-amber-600 dark:text-amber-400 font-extrabold flex items-center gap-1' : 'text-slate-700 dark:text-slate-200'}">
+                                ${isOrtodoncia ? '🦷 ' : ''}${cat}
+                            </span>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-extrabold text-sm">${formatCOP(totalAmount)}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-400">
+                            <span>${percentage}% del total global</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                            <div class="${isOrtodoncia ? 'bg-amber-500' : 'bg-indigo-500'} h-full rounded-full" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
 
         // --- MANEJO DE BOLSILLOS PERSISTENTES ---
         function handleCreatePocket(e) {
@@ -515,11 +611,12 @@
                 const limit = state.budgets[`${state.selectedMonth}_${cat}`] || 0;
                 const spent = expenseTotals[cat] || 0;
                 const percentage = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 100) : 0;
+                const isSelected = state.selectedCategoryFilter === cat;
 
                 container.innerHTML += `
-                    <div class="space-y-1 p-1 rounded-lg">
+                    <div onclick="filterByCategory('${cat}')" class="space-y-1 p-2 rounded-xl cursor-pointer transition-colors ${isSelected ? 'bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-300 dark:border-indigo-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}">
                         <div class="flex justify-between text-xs font-medium">
-                            <span>${cat}</span>
+                            <span class="${isSelected ? 'font-bold text-indigo-600 dark:text-indigo-300' : ''}">${cat}</span>
                             <span>${formatCOP(spent)} / ${formatCOP(limit)}</span>
                         </div>
                         <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
@@ -577,8 +674,25 @@
 
         function renderTransactions(monthTx) {
             const container = document.getElementById('transactions-list');
+            const badge = document.getElementById('selected-cat-badge');
+            const badgeText = document.getElementById('selected-cat-text');
             container.innerHTML = '';
+
             let filtered = state.filter === 'all' ? monthTx : monthTx.filter(t => t.type === state.filter);
+            
+            if (state.selectedCategoryFilter) {
+                filtered = filtered.filter(t => t.category === state.selectedCategoryFilter);
+                badge.classList.remove('hidden');
+                badgeText.textContent = `Filtrado por: ${state.selectedCategoryFilter}`;
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No hay movimientos registrados</p>';
+                return;
+            }
+
             filtered.forEach(tx => {
                 container.innerHTML += `
                     <div class="bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs">
