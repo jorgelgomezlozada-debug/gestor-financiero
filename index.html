@@ -82,7 +82,7 @@
             <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-indigo-500"></i> Topes por Categoría (Toca para ver detalle)
+                        <i class="fa-solid fa-chart-pie text-indigo-500"></i> Topes por Categoría
                     </h3>
                 </div>
                 <div id="budgets-container" class="space-y-3"></div>
@@ -351,7 +351,7 @@
             const listEl = document.getElementById('cat-detail-tx-list');
             listEl.innerHTML = monthTx.length === 0 ? '<p class="text-xs text-slate-400 text-center py-2">Sin movimientos</p>' : '';
             monthTx.forEach(tx => {
-                listEl.innerHTML += `<div class="flex justify-between text-xs bg-slate-50 dark:bg-slate-800 p-2 rounded"><span>${tx.desc || catName}</span><span class="font-bold text-rose-500">-${formatCOP(tx.amount)}</span></div>`;
+                listEl.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-800 p-2 rounded"><span>${tx.desc || catName}</span><span class="font-bold text-rose-500">-${formatCOP(tx.amount)}</span></div>`;
             });
             document.getElementById('category-detail-modal').classList.remove('hidden');
         }
@@ -401,6 +401,12 @@
             saveState(); renderApp(); closeModal('transaction-modal');
         }
 
+        function deleteTransaction(id) {
+            state.transactions = state.transactions.filter(t => t.id !== id);
+            saveState();
+            renderApp();
+        }
+
         function setFilter(type) {
             state.filter = type;
             renderApp();
@@ -414,7 +420,12 @@
                 container.innerHTML += `
                     <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
                         <div><p class="font-bold">${tx.category}</p><p class="text-[10px] text-slate-400">${tx.date} - ${tx.desc || ''}</p></div>
-                        <span class="font-bold ${tx.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}">${tx.type === 'income' ? '+' : '-'}${formatCOP(tx.amount)}</span>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold ${tx.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}">${tx.type === 'income' ? '+' : '-'}${formatCOP(tx.amount)}</span>
+                            <button onclick="deleteTransaction(${tx.id})" class="text-slate-400 hover:text-rose-500 p-1" title="Eliminar">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
             });
