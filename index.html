@@ -1,964 +1,376 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Control Financiero</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6366f1',
-                        secondary: '#ec4899',
-                        darkBg: '#0f172a',
-                        cardDark: '#1e293b'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontInter & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Hide scrollbar for mobile feel */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor Financiero COP</title>
+
+  <!-- PWA Manifest dinámico mediante Data URI -->
+  <link rel="manifest" href="data:application/manifest+json;utf8,%7B%22name%22%3A%22Gestor%20Financiero%20COP%22%2C%22short_name%22%3A%22Gestor%20COP%22%2C%22description%22%3A%22Control%20de%20ingresos%2C%20egresos%20y%20presupuestos%20en%20pesos%20colombianos%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4f6f9%22%2C%22theme_color%22%3A%22%234f46e5%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F2845%2F2845700.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+  <meta name="theme-color" content="#4f46e5">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; }
+    .app-container { width: 100%; max-width: 480px; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 70px; }
+    header { background: var(--primary); color: white; padding: 16px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 12px rgba(79,70,229,0.2); }
+    .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .month-selector { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 12px; margin-top: 8px; }
+    .month-selector button { background: none; border: none; color: white; font-size: 18px; cursor: pointer; padding: 0 8px; }
+    .month-selector input { background: transparent; border: none; color: white; font-size: 15px; font-weight: 600; text-align: center; color-scheme: dark; }
+    .summary-card { background: var(--card-bg); margin: -20px 16px 16px; padding: 16px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; position: relative; z-index: 5; }
+    .balance-box { grid-column: span 2; text-align: center; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .balance-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .balance-amount { font-size: 26px; font-weight: 700; color: var(--text); margin-top: 2px; }
+    .stat-box { text-align: center; }
+    .stat-title { font-size: 11px; color: var(--text-muted); }
+    .stat-amount { font-size: 15px; font-weight: 600; margin-top: 2px; }
+    .stat-amount.income { color: var(--success); }
+    .stat-amount.expense { color: var(--danger); }
+    .content { padding: 0 16px; flex: 1; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin: 16px 0 10px; }
+    .section-title { font-size: 15px; font-weight: 700; }
+    .btn-link { background: none; border: none; color: var(--primary); font-weight: 600; font-size: 13px; cursor: pointer; }
+    .categories-grid { display: flex; flex-direction: column; gap: 10px; }
+    .category-card { background: var(--card-bg); padding: 12px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid transparent; }
+    .category-card:active { border-color: var(--primary); }
+    .cat-info { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; font-weight: 600; }
+    .progress-bar { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .tx-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .tx-item { background: var(--card-bg); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    .tx-left { display: flex; gap: 10px; align-items: center; }
+    .tx-icon { width: 36px; height: 36px; border-radius: 10px; background: #e0e7ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .tx-title { font-size: 14px; font-weight: 600; }
+    .tx-date { font-size: 11px; color: var(--text-muted); }
+    .tx-amount { font-weight: 700; font-size: 14px; }
+    .tx-amount.income { color: var(--success); }
+    .tx-amount.expense { color: var(--danger); }
+    .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border); }
+    .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 11px; cursor: pointer; gap: 4px; }
+    .nav-btn.active { color: var(--primary); font-weight: 600; }
+    .fab { position: fixed; bottom: 75px; right: calc(50% - 220px); background: var(--primary); color: white; border: none; width: 50px; height: 50px; border-radius: 25px; font-size: 24px; box-shadow: 0 4px 10px rgba(79,70,229,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    @media (max-width: 480px) { .fab { right: 20px; } }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: flex-end; }
+    .modal-content { background: var(--card-bg); width: 100%; max-width: 480px; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; animation: slideUp 0.2s ease-out; max-height: 85vh; overflow-y: auto; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
+    .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
+    .btn-secondary { background: #e5e7eb; color: var(--text); margin-top: 8px; }
+  </style>
 </head>
-<body class="bg-slate-100 dark:bg-darkBg text-slate-800 dark:text-slate-100 h-full flex justify-center items-center transition-colors duration-300">
+<body>
 
-    <!-- Mobile Frame Container -->
-    <div class="w-full h-full sm:max-w-md sm:h-[90vh] sm:rounded-3xl sm:shadow-2xl bg-white dark:bg-cardDark flex flex-col overflow-hidden relative border border-slate-200 dark:border-slate-800">
-        
-        <!-- App Status Bar Simulated -->
-        <div class="bg-indigo-600 dark:bg-slate-900 text-white px-6 py-3 flex justify-between items-center text-xs font-semibold select-none z-20">
-            <span id="current-time">9:41</span>
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-signal"></i>
-                <i class="fa-solid fa-wifi"></i>
-                <i class="fa-solid fa-battery-full"></i>
-            </div>
-        </div>
+  <div class="app-container">
+    <header>
+      <div class="header-title">
+        <h2 style="font-size: 18px;">Gestor Financiero</h2>
+        <button class="btn-link" style="color:white;" onclick="openBackupModal()">⚙️ Respaldo</button>
+      </div>
+      <div class="month-selector">
+        <button onclick="changeMonth(-1)">❮</button>
+        <input type="month" id="monthPicker" onchange="renderApp()">
+        <button onclick="changeMonth(1)">❯</button>
+      </div>
+    </header>
 
-        <!-- Header / App Bar -->
-        <header class="bg-indigo-600 dark:bg-slate-900 text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">
-                    <i class="fa-solid fa-wallet"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold leading-tight">MiBolsillo</h1>
-                    <p class="text-xs text-indigo-200 dark:text-slate-400">Control Financiero</p>
-                </div>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="openModal('backup-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm flex items-center justify-center" title="Copia de Seguridad / Correo">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                </button>
-                <button onclick="openModal('category-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm flex items-center justify-center" title="Nueva Categoría">
-                    <i class="fa-solid fa-folder-plus"></i>
-                </button>
-                <button onclick="openModal('budget-modal')" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all text-sm flex items-center justify-center" title="Gestionar Topes">
-                    <i class="fa-solid fa-sliders"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- Month Navigation Bar -->
-        <div class="bg-indigo-700 dark:bg-slate-800 text-white px-4 py-2 flex justify-between items-center text-xs shadow-inner z-10">
-            <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-calendar-days text-indigo-300"></i>
-                <input type="month" id="month-picker" onchange="onMonthPickerChange(this.value)" class="bg-transparent font-bold text-sm focus:outline-none cursor-pointer text-white text-center">
-            </div>
-            <button onclick="changeMonth(1)" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
-        </div>
-
-        <!-- Main Content Area (Scrollable) -->
-        <main class="flex-1 overflow-y-auto no-scrollbar pb-24 p-4 space-y-5">
-            
-            <!-- SECTION 1: Summary Card -->
-            <section class="bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-900 dark:to-slate-800 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
-                <div class="absolute -right-6 -bottom-6 opacity-10 text-9xl">
-                    <i class="fa-solid fa-coins"></i>
-                </div>
-                <p class="text-xs uppercase tracking-wider text-indigo-200 font-medium">Balance Total (COP)</p>
-                <h2 id="total-balance" class="text-3xl font-extrabold mt-1 tracking-tight">$ 0</h2>
-                
-                <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/10">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                            <i class="fa-solid fa-arrow-down text-xs"></i>
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase text-indigo-200">Ingresos (Mes)</p>
-                            <p id="monthly-income" class="text-sm font-bold text-emerald-400">$ 0</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
-                            <i class="fa-solid fa-arrow-up text-xs"></i>
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase text-indigo-200">Egresos (Mes)</p>
-                            <p id="monthly-expense" class="text-sm font-bold text-rose-400">$ 0</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECTION 3: Category Budgets / Topes Progress -->
-            <section class="bg-white dark:bg-slate-800/60 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/50">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-indigo-500"></i> Topes por Categoría
-                    </h3>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="openModal('category-modal')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Categoría</button>
-                        <span class="text-slate-300 dark:text-slate-600">|</span>
-                        <button onclick="openModal('budget-modal')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Configurar</button>
-                    </div>
-                </div>
-                <div id="budgets-container" class="space-y-3">
-                    <!-- Dynamically injected budget bars -->
-                </div>
-            </section>
-
-            <!-- SECTION 4: Transactions List with Filters -->
-            <section class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-list-ul text-indigo-500"></i> Movimientos
-                    </h3>
-                    <!-- Filters -->
-                    <div class="flex space-x-1 bg-slate-200 dark:bg-slate-700 p-1 rounded-lg text-xs">
-                        <button onclick="setFilter('all')" id="filter-all" class="px-2.5 py-1 rounded-md font-medium bg-white dark:bg-slate-600 shadow-sm transition-all">Todos</button>
-                        <button onclick="setFilter('income')" id="filter-income" class="px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300 transition-all">Ingresos</button>
-                        <button onclick="setFilter('expense')" id="filter-expense" class="px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300 transition-all">Egresos</button>
-                    </div>
-                </div>
-
-                <!-- Transaction Items Wrapper -->
-                <div id="transactions-list" class="space-y-2">
-                    <!-- Injected via JS -->
-                </div>
-            </section>
-
-        </main>
-
-        <!-- Floating Action Button (FAB) for adding transaction -->
-        <div class="absolute bottom-6 right-6 z-20">
-            <button onclick="openModal('transaction-modal')" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-transform active:scale-95 focus:outline-none">
-                <i class="fa-solid fa-plus"></i>
-            </button>
-        </div>
-
-        <!-- Android Bottom Navigation Bar Simulated -->
-        <nav class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-2.5 flex justify-around items-center text-slate-500 dark:text-slate-400 z-10">
-            <button onclick="switchTab('home')" class="flex flex-col items-center text-indigo-600 dark:text-indigo-400">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[10px] mt-0.5 font-medium">Inicio</span>
-            </button>
-            <button onclick="openModal('transaction-modal')" class="flex flex-col items-center hover:text-indigo-600 transition-colors">
-                <i class="fa-solid fa-circle-plus text-lg"></i>
-                <span class="text-[10px] mt-0.5 font-medium">Añadir</span>
-            </button>
-            <button onclick="openModal('budget-modal')" class="flex flex-col items-center hover:text-indigo-600 transition-colors">
-                <i class="fa-solid fa-chart-line text-lg"></i>
-                <span class="text-[10px] mt-0.5 font-medium">Topes</span>
-            </button>
-            <button onclick="openModal('backup-modal')" class="flex flex-col items-center hover:text-indigo-600 transition-colors">
-                <i class="fa-solid fa-shield-halved text-lg"></i>
-                <span class="text-[10px] mt-0.5 font-medium">Respaldo</span>
-            </button>
-        </nav>
-
+    <div class="summary-card">
+      <div class="balance-box">
+        <div class="balance-title">Balance del Mes</div>
+        <div class="balance-amount" id="totalBalance">$ 0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">Ingresos</div>
+        <div class="stat-amount income" id="totalIncome">$ 0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">Egresos</div>
+        <div class="stat-amount expense" id="totalExpense">$ 0</div>
+      </div>
     </div>
 
-    <!-- MODAL 1: Add Transaction Form -->
-    <div id="transaction-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform duration-300 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice-dollar text-indigo-500"></i> Nueva Transacción
-                </h3>
-                <button onclick="closeModal('transaction-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
+    <div class="content">
+      <div class="section-header">
+        <span class="section-title">Topes por Categoría</span>
+        <button class="btn-link" onclick="openCategoryModal()">+ Categoría</button>
+      </div>
+      <div class="categories-grid" id="categoriesGrid"></div>
 
-            <form id="transaction-form" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
-                <!-- Type Selector Tabs -->
-                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                    <button type="button" id="type-expense" onclick="setTransactionType('expense')" class="py-2 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-rose-500 shadow-sm transition-all">Egreso (Gasto)</button>
-                    <button type="button" id="type-income" onclick="setTransactionType('income')" class="py-2 text-xs font-semibold rounded-lg text-slate-500 dark:text-slate-400 transition-all">Ingreso</button>
-                </div>
-
-                <!-- Amount -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Monto ($ COP)</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-bold">$</span>
-                        <input type="number" step="1" id="tx-amount" required placeholder="0" class="w-full pl-8 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white font-semibold">
-                    </div>
-                </div>
-
-                <!-- Category -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Categoría</label>
-                    <select id="tx-category" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
-                        <!-- Populated by JS -->
-                    </select>
-                </div>
-
-                <!-- Date -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Fecha</label>
-                    <input type="date" id="tx-date" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
-                </div>
-
-                <!-- Description -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Descripción (Opcional)</label>
-                    <input type="text" id="tx-desc" placeholder="Ej. Compras supermercado..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
-                </div>
-
-                <!-- Actions -->
-                <div class="pt-2 flex space-x-3">
-                    <button type="button" onclick="closeModal('transaction-modal')" class="w-1/2 py-3 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-md transition-colors">Guardar</button>
-                </div>
-            </form>
-        </div>
+      <div class="section-header" style="margin-top: 24px;">
+        <span class="section-title">Movimientos</span>
+      </div>
+      <div class="tx-list" id="txList"></div>
     </div>
 
-    <!-- MODAL 2: Budget Topes Management -->
-    <div id="budget-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform duration-300 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-indigo-500"></i> Gestión de Topes (Mensuales)
-                </h3>
-                <button onclick="closeModal('budget-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Define el límite máximo de gasto mensual para cada categoría de egresos.</p>
+    <button class="fab" onclick="openTxModal()">+</button>
+  </div>
 
-            <form id="budget-form" onsubmit="handleBudgetSubmit(event)" class="space-y-4">
-                <div id="budget-inputs-list" class="space-y-3">
-                    <!-- Dynamically populated budget inputs -->
-                </div>
-
-                <div class="pt-2 flex space-x-3">
-                    <button type="button" onclick="closeModal('budget-modal')" class="w-1/2 py-3 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-md transition-colors">Actualizar Topes</button>
-                </div>
-            </form>
-        </div>
+  <!-- Modal Transacción -->
+  <div class="modal" id="txModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 12px;" id="txModalTitle">Nuevo Movimiento</h3>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select class="form-control" id="txType" onchange="updateCategorySelect()">
+          <option value="expense">Egreso</option>
+          <option value="income">Ingreso</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Monto (COP)</label>
+        <input type="number" class="form-control" id="txAmount" placeholder="Ej: 50000">
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <select class="form-control" id="txCategory"></select>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <input type="text" class="form-control" id="txDesc" placeholder="Ej: Mercado mensual">
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" class="form-control" id="txDate">
+      </div>
+      <button class="btn" onclick="saveTransaction()">Guardar</button>
+      <button class="btn btn-secondary" onclick="closeModal('txModal')">Cancelar</button>
     </div>
+  </div>
 
-    <!-- MODAL 3: Create Custom Category -->
-    <div id="category-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform duration-300 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-folder-plus text-indigo-500"></i> Nueva Categoría
-                </h3>
-                <button onclick="closeModal('category-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+  <!-- Modal Crear Categoría -->
+  <div class="modal" id="catModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 12px;">Nueva Categoría</h3>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select class="form-control" id="catType">
+          <option value="expense">Egreso</option>
+          <option value="income">Ingreso</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" class="form-control" id="catName" placeholder="Ej: Mascotas">
+      </div>
+      <div class="form-group">
+        <label>Icono (Emoji)</label>
+        <input type="text" class="form-control" id="catIcon" value="🏷️">
+      </div>
+      <div class="form-group">
+        <label>Tope Mensual (COP)</label>
+        <input type="number" class="form-control" id="catLimit" placeholder="Ej: 200000">
+      </div>
+      <button class="btn" onclick="saveCategory()">Guardar Categoría</button>
+      <button class="btn btn-secondary" onclick="closeModal('catModal')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal Respaldo -->
+  <div class="modal" id="backupModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 12px;">Copia de Seguridad</h3>
+      <button class="btn" style="margin-bottom: 8px;" onclick="sendEmailReport()">✉️ Enviar Resumen al Correo</button>
+      <button class="btn btn-secondary" style="margin-top:0;" onclick="exportJSON()">📥 Descargar Copia (JSON)</button>
+      <button class="btn btn-secondary" onclick="closeModal('backupModal')">Cerrar</button>
+    </div>
+  </div>
+
+  <script>
+    const defaultCategories = [
+      { id: '1', name: 'Alimentos', icon: '🛒', type: 'expense', limit: 800000 },
+      { id: '2', name: 'Transporte', icon: '🚌', type: 'expense', limit: 300000 },
+      { id: '3', name: 'Vivienda', icon: '🏠', type: 'expense', limit: 1200000 },
+      { id: '4', name: 'Ocio', icon: '🎬', type: 'expense', limit: 250000 },
+      { id: '5', name: 'Salario', icon: '💼', type: 'income', limit: 0 }
+    ];
+
+    let categories = JSON.parse(localStorage.getItem('app_categories')) || defaultCategories;
+    let transactions = JSON.parse(localStorage.getItem('app_transactions')) || [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const now = new Date();
+      document.getElementById('monthPicker').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      document.getElementById('txDate').value = now.toISOString().split('T')[0];
+      renderApp();
+      registerSW();
+    });
+
+    function formatCOP(amount) {
+      return '$ ' + new Intl.NumberFormat('de-DE').format(amount);
+    }
+
+    function changeMonth(delta) {
+      const picker = document.getElementById('monthPicker');
+      let [year, month] = picker.value.split('-').map(Number);
+      month += delta;
+      if (month > 12) { month = 1; year++; }
+      if (month < 1) { month = 12; year--; }
+      picker.value = `${year}-${String(month).padStart(2, '0')}`;
+      renderApp();
+    }
+
+    function renderApp() {
+      const selectedMonth = document.getElementById('monthPicker').value;
+      const monthTxs = transactions.filter(t => t.date.startsWith(selectedMonth));
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      monthTxs.forEach(t => {
+        if (t.type === 'income') totalIncome += Number(t.amount);
+        else totalExpense += Number(t.amount);
+      });
+
+      document.getElementById('totalBalance').textContent = formatCOP(totalIncome - totalExpense);
+      document.getElementById('totalIncome').textContent = formatCOP(totalIncome);
+      document.getElementById('totalExpense').textContent = formatCOP(totalExpense);
+
+      // Render Categorías
+      const catGrid = document.getElementById('categoriesGrid');
+      catGrid.innerHTML = '';
+      categories.filter(c => c.type === 'expense').forEach(c => {
+        const spent = monthTxs.filter(t => t.categoryId === c.id).reduce((sum, t) => sum + Number(t.amount), 0);
+        const percent = c.limit > 0 ? Math.min(Math.round((spent / c.limit) * 100), 100) : 0;
+        let color = 'var(--success)';
+        if (percent > 80) color = 'var(--warning)';
+        if (spent > c.limit && c.limit > 0) color = 'var(--danger)';
+
+        catGrid.innerHTML += `
+          <div class="category-card">
+            <div class="cat-info">
+              <span>${c.icon} ${c.name}</span>
+              <span>${formatCOP(spent)} / ${formatCOP(c.limit)}</span>
             </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${percent}%; background: ${color};"></div>
+            </div>
+          </div>
+        `;
+      });
 
-            <form id="category-form" onsubmit="handleCategorySubmit(event)" class="space-y-4">
-                <!-- Type Selection -->
-                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                    <button type="button" id="cat-type-expense" onclick="setCategoryType('expense')" class="py-2 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-rose-500 shadow-sm transition-all">Egreso</button>
-                    <button type="button" id="cat-type-income" onclick="setCategoryType('income')" class="py-2 text-xs font-semibold rounded-lg text-slate-500 dark:text-slate-400 transition-all">Ingreso</button>
-                </div>
-
-                <!-- Name -->
+      // Render Movimientos
+      const txList = document.getElementById('txList');
+      txList.innerHTML = '';
+      if (monthTxs.length === 0) {
+        txList.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 20px;">Sin movimientos este mes</div>';
+      } else {
+        monthTxs.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+          const cat = categories.find(c => c.id === t.categoryId) || { icon: '💰' };
+          txList.innerHTML += `
+            <div class="tx-item">
+              <div class="tx-left">
+                <div class="tx-icon">${cat.icon}</div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Nombre de Categoría</label>
-                    <input type="text" id="cat-name" required placeholder="Ej. Mascotas, Gimnasio..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
+                  <div class="tx-title">${t.desc}</div>
+                  <div class="tx-date">${t.date}</div>
                 </div>
-
-                <!-- Icon Selector -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Icono</label>
-                    <div class="grid grid-cols-6 gap-2 text-lg text-slate-600 dark:text-slate-300">
-                        <button type="button" onclick="selectCatIcon('fa-paw')" class="cat-icon-btn p-2 border rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex justify-center items-center"><i class="fa-solid fa-paw"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-dumbbell')" class="cat-icon-btn p-2 border rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex justify-center items-center"><i class="fa-solid fa-dumbbell"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-graduation-cap')" class="cat-icon-btn p-2 border rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex justify-center items-center"><i class="fa-solid fa-graduation-cap"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-plane')" class="cat-icon-btn p-2 border rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex justify-center items-center"><i class="fa-solid fa-plane"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-house-user')" class="cat-icon-btn p-2 border rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex justify-center items-center"><i class="fa-solid fa-house-user"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-gift')" class="cat-icon-btn p-2 border rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex justify-center items-center"><i class="fa-solid fa-gift"></i></button>
-                    </div>
-                    <input type="hidden" id="cat-icon" value="fa-tag">
-                </div>
-
-                <!-- Initial Budget (if expense) -->
-                <div id="cat-budget-container">
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Tope / Presupuesto Mensual ($ COP)</label>
-                    <input type="number" step="1" id="cat-budget" placeholder="500000" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
-                </div>
-
-                <!-- Actions -->
-                <div class="pt-2 flex space-x-3">
-                    <button type="button" onclick="closeModal('category-modal')" class="w-1/2 py-3 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-md transition-colors">Crear</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL 4: Category Detail View -->
-    <div id="category-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform duration-300 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 id="cat-detail-title" class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                    <!-- Title injected -->
-                </h3>
-                <button onclick="closeModal('category-detail-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+              </div>
+              <div class="tx-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatCOP(t.amount)}</div>
             </div>
-
-            <!-- Summary Card for Category -->
-            <div id="cat-detail-summary" class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-4 space-y-2">
-                <!-- Summary Injected -->
-            </div>
-
-            <!-- Category Transactions -->
-            <div class="space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Movimientos del Mes</h4>
-                <div id="cat-detail-tx-list" class="space-y-2">
-                    <!-- Transactions injected -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL 5: Backup & Cloud Export Manager -->
-    <div id="backup-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform duration-300 max-h-[90vh] overflow-y-auto space-y-4">
-            <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-shield-halved text-indigo-500"></i> Copia de Seguridad Offline
-                </h3>
-                <button onclick="closeModal('backup-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <p class="text-xs text-slate-500 dark:text-slate-400">Tus datos están guardados seguro en tu dispositivo sin conexión. Puedes respaldarlos por correo o archivo JSON para restaurar en cualquier momento.</p>
-
-            <div class="space-y-2">
-                <!-- Send Backup via Mailto -->
-                <button onclick="sendBackupEmail()" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-between shadow-sm transition-all">
-                    <span class="flex items-center gap-2"><i class="fa-solid fa-envelope"></i> Enviar Resumen al Correo</span>
-                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                </button>
-
-                <!-- Export JSON Backup file -->
-                <button onclick="exportJSONBackup()" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-between shadow-sm transition-all">
-                    <span class="flex items-center gap-2"><i class="fa-solid fa-file-export"></i> Descargar Respaldo JSON</span>
-                    <i class="fa-solid fa-download text-[10px]"></i>
-                </button>
-
-                <!-- Import JSON Backup file -->
-                <label class="w-full py-3 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between shadow-sm transition-all cursor-pointer">
-                    <span class="flex items-center gap-2"><i class="fa-solid fa-file-import text-indigo-500"></i> Restaurar Copia (JSON)</span>
-                    <input type="file" id="import-json-file" accept=".json" onchange="importJSONBackup(event)" class="hidden">
-                    <i class="fa-solid fa-upload text-[10px]"></i>
-                </label>
-            </div>
-
-            <div class="pt-2">
-                <button type="button" onclick="closeModal('backup-modal')" class="w-full py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Custom Notification / Message Box -->
-    <div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300">
-        <div id="toast-message" class="bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-lg flex items-center space-x-2">
-            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
-            <span id="toast-text">Acción completada con éxito</span>
-        </div>
-    </div>
-
-    <!-- App Logic & Offline PWA Service Worker JavaScript -->
-    <script>
-        // --- Register Offline Service Worker dynamically (PWA Support) ---
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'mibolsillo-v1';
-                const ASSETS = [
-                    './',
-                    'https://cdn.tailwindcss.com',
-                    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-                    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
-                ];
-
-                self.addEventListener('install', (e) => {
-                    e.waitUntil(
-                        caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
-                    );
-                });
-
-                self.addEventListener('activate', (e) => {
-                    e.waitUntil(
-                        caches.keys().then((keys) => {
-                            return Promise.all(keys.map((key) => {
-                                if (key !== CACHE_NAME) return caches.delete(key);
-                            }));
-                        }).then(() => self.clients.claim())
-                    );
-                });
-
-                self.addEventListener('fetch', (e) => {
-                    e.respondWith(
-                        caches.match(e.request).then((res) => {
-                            return res || fetch(e.request).then((response) => {
-                                return caches.open(CACHE_NAME).then((cache) => {
-                                    cache.put(e.request, response.clone());
-                                    return response;
-                                });
-                            });
-                        }).catch(() => caches.match('./'))
-                    );
-                });
-            `;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Reg Error:', err));
-        }
-
-        // --- State Management & Persistence ---
-        const INITIAL_CATEGORIES = {
-            expense: [
-                { name: 'Comida', icon: 'fa-utensils', color: 'bg-amber-500' },
-                { name: 'Transporte', icon: 'fa-car', color: 'bg-blue-500' },
-                { name: 'Ocio', icon: 'fa-gamepad', color: 'bg-purple-500' },
-                { name: 'Servicios', icon: 'fa-bolt', color: 'bg-emerald-500' },
-                { name: 'Salud', icon: 'fa-kit-medical', color: 'bg-rose-500' },
-                { name: 'Otros', icon: 'fa-tag', color: 'bg-slate-500' }
-            ],
-            income: [
-                { name: 'Salario', icon: 'fa-briefcase', color: 'bg-emerald-500' },
-                { name: 'Freelance', icon: 'fa-laptop-code', color: 'indigo-500' },
-                { name: 'Inversiones', icon: 'fa-chart-line', color: 'blue-500' },
-                { name: 'Otros Ingresos', icon: 'fa-circle-plus', color: 'slate-500' }
-            ]
-        };
-
-        const today = new Date();
-        const initialMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-
-        let state = {
-            categories: JSON.parse(localStorage.getItem('mibolsillo_categories')) || INITIAL_CATEGORIES,
-            transactions: JSON.parse(localStorage.getItem('mibolsillo_transactions')) || [
-                { id: 1, type: 'income', amount: 3500000, category: 'Salario', date: `${initialMonth}-01`, desc: 'Pago mensual' },
-                { id: 2, type: 'expense', amount: 450000, category: 'Comida', date: `${initialMonth}-02`, desc: 'Supermercado semanal' },
-                { id: 3, type: 'expense', amount: 120000, category: 'Transporte', date: `${initialMonth}-03`, desc: 'Gasolina' }
-            ],
-            budgets: JSON.parse(localStorage.getItem('mibolsillo_budgets')) || {
-                'Comida': 800000,
-                'Transporte': 300000,
-                'Ocio': 400000,
-                'Servicios': 350000,
-                'Salud': 200000,
-                'Otros': 150000
-            },
-            selectedMonth: initialMonth,
-            currentType: 'expense',
-            newCatType: 'expense',
-            filter: 'all'
-        };
-
-        // --- Currency Formatter (COP) ---
-        function formatCOP(amount) {
-            return '$ ' + Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        function saveState() {
-            localStorage.setItem('mibolsillo_categories', JSON.stringify(state.categories));
-            localStorage.setItem('mibolsillo_transactions', JSON.stringify(state.transactions));
-            localStorage.setItem('mibolsillo_budgets', JSON.stringify(state.budgets));
-        }
-
-        // --- Backup & Email Export Utilities ---
-        function sendBackupEmail() {
-            const monthTx = state.transactions.filter(tx => tx.date.startsWith(state.selectedMonth));
-            let totalIncome = 0;
-            let totalExpense = 0;
-
-            let detailsText = `RESUMEN FINANCIERO (${state.selectedMonth}):\n\n`;
-            monthTx.forEach(tx => {
-                if(tx.type === 'income') totalIncome += Number(tx.amount);
-                else totalExpense += Number(tx.amount);
-                detailsText += `• [${tx.date}] ${tx.category}: ${tx.type === 'income' ? '+' : '-'}${formatCOP(tx.amount)} (${tx.desc || 'Sin desc'})\n`;
-            });
-
-            detailsText += `\n---------------------------------\n`;
-            detailsText += `INGRESOS TOTALES: ${formatCOP(totalIncome)}\n`;
-            detailsText += `EGRESOS TOTALES: ${formatCOP(totalExpense)}\n`;
-            detailsText += `BALANCE DEL MES: ${formatCOP(totalIncome - totalExpense)}\n\n`;
-            detailsText += `Copia del respaldo de datos guardada localmente el ${new Date().toLocaleDateString()}.`;
-
-            const subject = encodeURIComponent(`Respaldo Financiero COP - ${state.selectedMonth}`);
-            const body = encodeURIComponent(detailsText);
-            window.location.href = `mailto:?subject=${subject}&body=${body}`;
-            showToast('Generando enlace para correo...');
-        }
-
-        function exportJSONBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `MiBolsillo_Respaldo_${state.selectedMonth}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast('Respaldo JSON descargado');
-        }
-
-        function importJSONBackup(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = function(e) {
-                try {
-                    const importedState = JSON.parse(e.target.result);
-                    if(importedState.categories && importedState.transactions && importedState.budgets) {
-                        state.categories = importedState.categories;
-                        state.transactions = importedState.transactions;
-                        state.budgets = importedState.budgets;
-                        saveState();
-                        renderApp();
-                        closeModal('backup-modal');
-                        showToast('Copia de seguridad restaurada');
-                    } else {
-                        showToast('Formato de archivo no válido', true);
-                    }
-                } catch(err) {
-                    showToast('Error al leer el archivo JSON', true);
-                }
-            };
-            if(event.target.files[0]) {
-                fileReader.readAsText(event.target.files[0]);
-            }
-        }
-
-        // --- Date Navigation ---
-        function changeMonth(offset) {
-            const [year, month] = state.selectedMonth.split('-').map(Number);
-            const date = new Date(year, month - 1 + offset, 1);
-            const newYear = date.getFullYear();
-            const newMonth = String(date.getMonth() + 1).padStart(2, '0');
-            state.selectedMonth = `${newYear}-${newMonth}`;
-            document.getElementById('month-picker').value = state.selectedMonth;
-            renderApp();
-        }
-
-        function onMonthPickerChange(value) {
-            if(value) {
-                state.selectedMonth = value;
-                renderApp();
-            }
-        }
-
-        // --- Custom Categories Management ---
-        function setCategoryType(type) {
-            state.newCatType = type;
-            const btnExpense = document.getElementById('cat-type-expense');
-            const btnIncome = document.getElementById('cat-type-income');
-            const budgetContainer = document.getElementById('cat-budget-container');
-
-            if(type === 'expense') {
-                btnExpense.className = "py-2 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-rose-500 shadow-sm transition-all";
-                btnIncome.className = "py-2 text-xs font-semibold rounded-lg text-slate-500 dark:text-slate-400 transition-all";
-                budgetContainer.classList.remove('hidden');
-            } else {
-                btnIncome.className = "py-2 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-emerald-500 shadow-sm transition-all";
-                btnExpense.className = "py-2 text-xs font-semibold rounded-lg text-slate-500 dark:text-slate-400 transition-all";
-                budgetContainer.classList.add('hidden');
-            }
-        }
-
-        function selectCatIcon(iconClass) {
-            document.getElementById('cat-icon').value = iconClass;
-            document.querySelectorAll('.cat-icon-btn').forEach(btn => {
-                btn.classList.remove('border-indigo-500', 'bg-indigo-50', 'dark:bg-indigo-900/30');
-                if(btn.innerHTML.includes(iconClass)) {
-                    btn.classList.add('border-indigo-500', 'bg-indigo-50', 'dark:bg-indigo-900/30');
-                }
-            });
-        }
-
-        function handleCategorySubmit(e) {
-            e.preventDefault();
-            const name = document.getElementById('cat-name').value.trim();
-            const icon = document.getElementById('cat-icon').value || 'fa-tag';
-            const budgetVal = parseFloat(document.getElementById('cat-budget').value) || 0;
-
-            if(!name) return;
-
-            const existing = state.categories[state.newCatType].find(c => c.name.toLowerCase() === name.toLowerCase());
-            if(existing) {
-                showToast('Esa categoría ya existe', true);
-                return;
-            }
-
-            state.categories[state.newCatType].push({ name, icon, color: 'bg-indigo-500' });
-            if(state.newCatType === 'expense' && budgetVal > 0) {
-                state.budgets[name] = budgetVal;
-            }
-
-            saveState();
-            renderApp();
-            closeModal('category-modal');
-            document.getElementById('category-form').reset();
-            showToast('Categoría creada exitosamente');
-        }
-
-        // --- Category Detail Modal ---
-        function openCategoryDetail(catName) {
-            const modal = document.getElementById('category-detail-modal');
-            const titleEl = document.getElementById('cat-detail-title');
-            const summaryEl = document.getElementById('cat-detail-summary');
-            const listEl = document.getElementById('cat-detail-tx-list');
-
-            const catObj = state.categories.expense.find(c => c.name === catName) || { icon: 'fa-tag' };
-            titleEl.innerHTML = `<i class="fa-solid ${catObj.icon} text-indigo-500"></i> ${catName}`;
-
-            const catTx = state.transactions.filter(t => t.category === catName && t.date.startsWith(state.selectedMonth));
-            const spent = catTx.reduce((acc, curr) => acc + Number(curr.amount), 0);
-            const limit = state.budgets[catName] || 0;
-            const diff = limit - spent;
-
-            summaryEl.innerHTML = `
-                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                    <span>Gasto Mes (${state.selectedMonth}):</span>
-                    <span class="font-bold text-slate-800 dark:text-white">${formatCOP(spent)}</span>
-                </div>
-                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                    <span>Tope Configurado:</span>
-                    <span class="font-bold text-slate-800 dark:text-white">${formatCOP(limit)}</span>
-                </div>
-                <div class="flex justify-between text-xs pt-1 border-t border-slate-200 dark:border-slate-700">
-                    <span>Disponible:</span>
-                    <span class="font-bold ${diff < 0 ? 'text-rose-500' : 'text-emerald-500'}">${formatCOP(diff)}</span>
-                </div>
-            `;
-
-            listEl.innerHTML = '';
-            if(catTx.length === 0) {
-                listEl.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">No hay movimientos en este mes</p>`;
-            } else {
-                catTx.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(tx => {
-                    const item = document.createElement('div');
-                    item.className = "flex justify-between items-center bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-100 dark:border-slate-700/50 text-xs";
-                    item.innerHTML = `
-                        <div>
-                            <p class="font-semibold text-slate-800 dark:text-slate-200">${tx.desc || tx.category}</p>
-                            <p class="text-[10px] text-slate-400">${tx.date}</p>
-                        </div>
-                        <span class="font-bold text-rose-500">-${formatCOP(tx.amount)}</span>
-                    `;
-                    listEl.appendChild(item);
-                });
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        // --- UI & Modals ---
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('hidden');
-            if(modalId === 'transaction-modal') {
-                document.getElementById('tx-date').value = `${state.selectedMonth}-01`;
-                updateCategorySelect();
-            } else if(modalId === 'budget-modal') {
-                renderBudgetInputs();
-            }
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        function showToast(text, isError = false) {
-            const toast = document.getElementById('toast-container');
-            const toastText = document.getElementById('toast-text');
-            const toastIcon = document.getElementById('toast-icon');
-            
-            toastText.textContent = text;
-            toastIcon.className = isError ? "fa-solid fa-triangle-exclamation text-rose-400" : "fa-solid fa-circle-check text-emerald-400";
-            
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
-
-        // --- Time Bar Simulation ---
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            document.getElementById('current-time').textContent = `${hours}:${minutes}`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // --- Form Controls ---
-        function setTransactionType(type) {
-            state.currentType = type;
-            const btnExpense = document.getElementById('type-expense');
-            const btnIncome = document.getElementById('type-income');
-            
-            if(type === 'expense') {
-                btnExpense.className = "py-2 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-rose-500 shadow-sm transition-all";
-                btnIncome.className = "py-2 text-xs font-semibold rounded-lg text-slate-500 dark:text-slate-400 transition-all";
-            } else {
-                btnIncome.className = "py-2 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-emerald-500 shadow-sm transition-all";
-                btnExpense.className = "py-2 text-xs font-semibold rounded-lg text-slate-500 dark:text-slate-400 transition-all";
-            }
-            updateCategorySelect();
-        }
-
-        function updateCategorySelect() {
-            const select = document.getElementById('tx-category');
-            select.innerHTML = '';
-            const cats = state.categories[state.currentType];
-            cats.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat.name;
-                opt.textContent = cat.name;
-                select.appendChild(opt);
-            });
-        }
-
-        // --- Render Main Dashboard ---
-        function renderApp() {
-            document.getElementById('month-picker').value = state.selectedMonth;
-
-            const monthTx = state.transactions.filter(tx => tx.date.startsWith(state.selectedMonth));
-
-            let totalIncome = 0;
-            let totalExpense = 0;
-            
-            monthTx.forEach(tx => {
-                if(tx.type === 'income') totalIncome += Number(tx.amount);
-                else totalExpense += Number(tx.amount);
-            });
-
-            const balance = totalIncome - totalExpense;
-
-            document.getElementById('total-balance').textContent = formatCOP(balance);
-            document.getElementById('monthly-income').textContent = formatCOP(totalIncome);
-            document.getElementById('monthly-expense').textContent = formatCOP(totalExpense);
-
-            renderBudgetsProgress(monthTx);
-            renderTransactions(monthTx);
-        }
-
-        // --- Budget Progress & Alerts ---
-        function renderBudgetsProgress(monthTx) {
-            const container = document.getElementById('budgets-container');
-            container.innerHTML = '';
-
-            const expenseTotals = {};
-            monthTx.filter(t => t.type === 'expense').forEach(t => {
-                expenseTotals[t.category] = (expenseTotals[t.category] || 0) + Number(t.amount);
-            });
-
-            state.categories.expense.forEach(cat => {
-                const limit = state.budgets[cat.name] || 500000;
-                const spent = expenseTotals[cat.name] || 0;
-                const percentage = Math.min(Math.round((spent / limit) * 100), 100);
-                const rawPercentage = limit > 0 ? (spent / limit) * 100 : 0;
-
-                let barColor = 'bg-indigo-500';
-                let alertBadge = '';
-                if(rawPercentage > 100) {
-                    barColor = 'bg-rose-500';
-                    alertBadge = '<span class="text-[10px] bg-rose-100 dark:bg-rose-900/40 text-rose-500 px-1.5 py-0.5 rounded font-bold">¡Topes superados!</span>';
-                } else if(rawPercentage > 80) {
-                    barColor = 'bg-amber-500';
-                    alertBadge = '<span class="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-500 px-1.5 py-0.5 rounded font-bold">Cerca del límite</span>';
-                }
-
-                const item = document.createElement('div');
-                item.className = "space-y-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 p-1 rounded-lg transition-colors";
-                item.onclick = () => openCategoryDetail(cat.name);
-                item.innerHTML = `
-                    <div class="flex justify-between text-xs font-medium">
-                        <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                            <i class="fa-solid ${cat.icon} text-slate-400"></i> ${cat.name}
-                        </span>
-                        <div class="flex items-center space-x-2">
-                            ${alertBadge}
-                            <span class="text-slate-500 dark:text-slate-400">${formatCOP(spent)} / ${formatCOP(limit)}</span>
-                        </div>
-                    </div>
-                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                        <div class="${barColor} h-full rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function renderBudgetInputs() {
-            const container = document.getElementById('budget-inputs-list');
-            container.innerHTML = '';
-            state.categories.expense.forEach(cat => {
-                const val = state.budgets[cat.name] || 500000;
-                const div = document.createElement('div');
-                div.className = "flex items-center justify-between space-x-3";
-                div.innerHTML = `
-                    <label class="text-xs font-medium text-slate-600 dark:text-slate-300 w-1/3 flex items-center gap-2">
-                        <i class="fa-solid ${cat.icon} text-indigo-500"></i> ${cat.name}
-                    </label>
-                    <div class="relative w-2/3">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-semibold text-xs">$</span>
-                        <input type="number" step="1" data-category="${cat.name}" value="${val}" required class="budget-input w-full pl-7 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // --- Transaction List & Filtering ---
-        function setFilter(type) {
-            state.filter = type;
-            ['all', 'income', 'expense'].forEach(t => {
-                const btn = document.getElementById(`filter-${t}`);
-                if(t === type) {
-                    btn.className = "px-2.5 py-1 rounded-md font-medium bg-white dark:bg-slate-600 shadow-sm transition-all text-indigo-600 dark:text-indigo-400";
-                } else {
-                    btn.className = "px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300 transition-all";
-                }
-            });
-            renderApp();
-        }
-
-        function renderTransactions(monthTx) {
-            const listContainer = document.getElementById('transactions-list');
-            listContainer.innerHTML = '';
-
-            let filtered = monthTx;
-            if(state.filter !== 'all') {
-                filtered = monthTx.filter(t => t.type === state.filter);
-            }
-
-            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            if(filtered.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs">
-                        <i class="fa-solid fa-folder-open text-2xl mb-1"></i>
-                        <p>No hay transacciones registradas este mes</p>
-                    </div>
-                `;
-                return;
-            }
-
-            filtered.forEach(tx => {
-                const isIncome = tx.type === 'income';
-                const sign = isIncome ? '+' : '-';
-                const amountClass = isIncome ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-200';
-                
-                const categoryGroup = isIncome ? state.categories.income : state.categories.expense;
-                const catObj = categoryGroup.find(c => c.name === tx.category) || { icon: 'fa-tag' };
-
-                const item = document.createElement('div');
-                item.className = "bg-white dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 flex justify-between items-center shadow-sm hover:border-indigo-200 transition-all";
-                item.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-xl ${isIncome ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'} flex items-center justify-center text-sm">
-                            <i class="fa-solid ${catObj.icon}"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">${tx.category}</h4>
-                            <p class="text-[10px] text-slate-400">${tx.desc || tx.date}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="text-xs font-bold ${amountClass}">${sign}${formatCOP(tx.amount)}</span>
-                        <button onclick="deleteTransaction(${tx.id})" class="text-slate-400 hover:text-rose-500 transition-colors p-1" title="Eliminar">
-                            <i class="fa-solid fa-trash-can text-xs"></i>
-                        </button>
-                    </div>
-                `;
-                listContainer.appendChild(item);
-            });
-        }
-
-        // --- Handlers ---
-        function handleTransactionSubmit(e) {
-            e.preventDefault();
-            const amount = document.getElementById('tx-amount').value;
-            const category = document.getElementById('tx-category').value;
-            const date = document.getElementById('tx-date').value;
-            const desc = document.getElementById('tx-desc').value;
-
-            const newTx = {
-                id: Date.now(),
-                type: state.currentType,
-                amount: parseFloat(amount),
-                category,
-                date,
-                desc
-            };
-
-            state.transactions.push(newTx);
-            saveState();
-            renderApp();
-            closeModal('transaction-modal');
-            document.getElementById('transaction-form').reset();
-            showToast('Transacción registrada exitosamente');
-        }
-
-        function handleBudgetSubmit(e) {
-            e.preventDefault();
-            const inputs = document.querySelectorAll('.budget-input');
-            inputs.forEach(input => {
-                const cat = input.getAttribute('data-category');
-                const val = parseFloat(input.value) || 0;
-                state.budgets[cat] = val;
-            });
-
-            saveState();
-            renderApp();
-            closeModal('budget-modal');
-            showToast('Topes actualizados correctamente');
-        }
-
-        function deleteTransaction(id) {
-            state.transactions = state.transactions.filter(t => t.id !== id);
-            saveState();
-            renderApp();
-            showToast('Transacción eliminada', true);
-        }
-
-        // --- Initialization ---
-        window.onload = function() {
-            renderApp();
-        };
-    </script>
+          `;
+        });
+      }
+    }
+
+    function openTxModal() {
+      updateCategorySelect();
+      document.getElementById('txModal').style.display = 'flex';
+    }
+
+    function openCategoryModal() {
+      document.getElementById('catModal').style.display = 'flex';
+    }
+
+    function openBackupModal() {
+      document.getElementById('backupModal').style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function updateCategorySelect() {
+      const type = document.getElementById('txType').value;
+      const select = document.getElementById('txCategory');
+      select.innerHTML = '';
+      categories.filter(c => c.type === type).forEach(c => {
+        select.innerHTML += `<option value="${c.id}">${c.icon} ${c.name}</option>`;
+      });
+    }
+
+    function saveTransaction() {
+      const amount = document.getElementById('txAmount').value;
+      const desc = document.getElementById('txDesc').value;
+      const date = document.getElementById('txDate').value;
+      const type = document.getElementById('txType').value;
+      const categoryId = document.getElementById('txCategory').value;
+
+      if (!amount || !desc || !date) return alert('Completa todos los campos');
+
+      transactions.push({ id: Date.now().toString(), amount: Number(amount), desc, date, type, categoryId });
+      localStorage.setItem('app_transactions', JSON.stringify(transactions));
+      closeModal('txModal');
+      renderApp();
+    }
+
+    function saveCategory() {
+      const name = document.getElementById('catName').value;
+      const icon = document.getElementById('catIcon').value;
+      const type = document.getElementById('catType').value;
+      const limit = document.getElementById('catLimit').value || 0;
+
+      if (!name) return alert('Ingresa un nombre');
+
+      categories.push({ id: Date.now().toString(), name, icon, type, limit: Number(limit) });
+      localStorage.setItem('app_categories', JSON.stringify(categories));
+      closeModal('catModal');
+      renderApp();
+    }
+
+    function exportJSON() {
+      const data = JSON.stringify({ categories, transactions }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `backup_financiero_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    }
+
+    function sendEmailReport() {
+      const month = document.getElementById('monthPicker').value;
+      const monthTxs = transactions.filter(t => t.date.startsWith(month));
+      let body = `Resumen Financiero (${month}):\n\n`;
+      monthTxs.forEach(t => {
+        body += `${t.date} | ${t.desc} | ${t.type === 'income' ? '+' : '-'}${formatCOP(t.amount)}\n`;
+      });
+      window.location.href = `mailto:?subject=Resumen Financiero ${month}&body=${encodeURIComponent(body)}`;
+    }
+
+    function registerSW() {
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+          self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+          self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+          self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+        `;
+        const blob = new Blob([swCode], { type: 'text/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+      }
+    }
+  </script>
 </body>
 </html>
