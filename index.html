@@ -103,7 +103,7 @@
                 <div id="pockets-container" class="space-y-2"></div>
             </section>
 
-            <!-- TOPES DEL MES CON FILTRO POR CLIC -->
+            <!-- TOPES DEL MES CON FILTRO POR CLIC Y RESTANTE -->
             <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
                 <div class="flex justify-between items-center mb-3">
                     <div>
@@ -114,7 +114,7 @@
                     </div>
                     <button onclick="openModal('budget-modal')" class="text-xs text-indigo-500 font-semibold hover:underline">Configurar Topes</button>
                 </div>
-                <div id="budgets-container" class="space-y-2"></div>
+                <div id="budgets-container" class="space-y-3"></div>
             </section>
 
             <!-- MOVIMIENTOS -->
@@ -639,17 +639,39 @@
             getCurrentCategories().forEach(cat => {
                 const limit = state.budgets[`${state.selectedMonth}_${cat}`] || 0;
                 const spent = expenseTotals[cat] || 0;
+                const remaining = limit - spent;
                 const percentage = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 100) : 0;
+                const isExceeded = limit > 0 && spent > limit;
                 const isSelected = state.selectedCategoryFilter === cat;
 
+                let remainingText = '';
+                let remainingClass = '';
+
+                if (limit > 0) {
+                    if (isExceeded) {
+                        remainingText = `Excedido: ${formatCOP(Math.abs(remaining))}`;
+                        remainingClass = 'text-rose-500 font-bold';
+                    } else {
+                        remainingText = `Restante: ${formatCOP(remaining)}`;
+                        remainingClass = 'text-slate-500 dark:text-slate-400';
+                    }
+                } else {
+                    remainingText = `Gastado: ${formatCOP(spent)}`;
+                    remainingClass = 'text-slate-500 dark:text-slate-400';
+                }
+
                 container.innerHTML += `
-                    <div onclick="filterByCategory('${cat}')" class="space-y-1 p-2 rounded-xl cursor-pointer transition-colors ${isSelected ? 'bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-300 dark:border-indigo-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}">
-                        <div class="flex justify-between text-xs font-medium">
+                    <div onclick="filterByCategory('${cat}')" class="space-y-1.5 p-2.5 rounded-xl cursor-pointer transition-colors ${isSelected ? 'bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-300 dark:border-indigo-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}">
+                        <div class="flex justify-between items-center text-xs font-medium">
                             <span class="${isSelected ? 'font-bold text-indigo-600 dark:text-indigo-300' : ''}">${cat}</span>
-                            <span>${formatCOP(spent)} / ${formatCOP(limit)}</span>
+                            <span class="${remainingClass}">${remainingText}</span>
                         </div>
-                        <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-indigo-500 h-full rounded-full" style="width: ${percentage}%"></div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-400">
+                            <span>Gastado: ${formatCOP(spent)}</span>
+                            <span>Tope: ${formatCOP(limit)}</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                            <div class="${isExceeded ? 'bg-rose-500' : 'bg-indigo-500'} h-full rounded-full transition-all duration-300" style="width: ${percentage}%"></div>
                         </div>
                     </div>
                 `;
@@ -728,7 +750,6 @@
                 badge.classList.add('hidden');
             }
 
-            // ORDENAR MOVIMIENTOS POR FECHA (De más reciente a más antiguo)
             filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (filtered.length === 0) {
